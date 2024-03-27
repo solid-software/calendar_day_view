@@ -1,6 +1,8 @@
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../../../calendar_day_view.dart';
@@ -173,65 +175,74 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
 
           return Column(
             children: [
-              SingleChildScrollView(
-                controller: _headerScrollController,
-                clipBehavior: Clip.none,
-                scrollDirection: Axis.horizontal,
-                child: widget.titleRowBuilder!.call(
-                  rowHeight: rowHeight,
-                  verticalDivider: widget.verticalDivider,
-                  categories: widget.categories,
-                  tileWidth: tileWidth,
-                  headerDecoration: widget.headerDecoration,
-                  timeColumnWidth: widget.timeColumnWidth,
-                  logo: widget.logo,
+              SizedBox(
+                height: rowHeight,
+                child: SingleChildScrollView(
+                  controller: _headerScrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: widget.titleRowBuilder!.call(
+                    rowHeight: rowHeight,
+                    verticalDivider: widget.verticalDivider,
+                    categories: widget.categories,
+                    tileWidth: tileWidth,
+                    headerDecoration: widget.headerDecoration,
+                    timeColumnWidth: widget.timeColumnWidth,
+                    logo: widget.logo,
+                  ),
                 ),
               ),
               Expanded(
                 child: Row(
                   children: [
-                    SingleChildScrollView(
-                      controller: _timeScrollController,
-                      child: TimeAndLogoWidget(
-                        rowHeight: rowHeight,
-                        timeColumnWidth: widget.timeColumnWidth,
-                        timeList: timeList,
-                        evenRowColor: widget.evenRowColor,
-                        oddRowColor: widget.oddRowColor,
-                        headerDecoration: widget.headerDecoration,
-                        horizontalDivider: widget.horizontalDivider,
-                        verticalDivider: widget.verticalDivider,
-                        logo: widget.logo,
-                        timeTextStyle: widget.timeTextStyle,
+                    ClipPath(
+                      clipper: VerticalClipper(),
+                      child: SingleChildScrollView(
+                        controller: _timeScrollController,
+                        clipBehavior: Clip.none,
+                        child: TimeAndLogoWidget(
+                          rowHeight: rowHeight,
+                          timeColumnWidth: widget.timeColumnWidth,
+                          timeList: timeList,
+                          evenRowColor: widget.evenRowColor,
+                          oddRowColor: widget.oddRowColor,
+                          headerDecoration: widget.headerDecoration,
+                          horizontalDivider: widget.horizontalDivider,
+                          verticalDivider: widget.verticalDivider,
+                          logo: widget.logo,
+                          timeTextStyle: widget.timeTextStyle,
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        controller: _vertScrollController,
-                        clipBehavior: Clip.none,
+                      child: ClipPath(
+                        clipper: VerticalClipper(),
                         child: SingleChildScrollView(
-                          controller: _horizScrollController,
+                          controller: _vertScrollController,
                           clipBehavior: Clip.none,
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: totalWidth + widget.timeColumnWidth,
-                            child: _DayViewBody(
-                              timeList: timeList,
-                              rowHeight: rowHeight,
-                              tileWidth: tileWidth,
-                              evenRowColor: widget.evenRowColor,
-                              oddRowColor: widget.oddRowColor,
-                              rowBuilder: widget.backgroundTimeTileBuilder,
-                              events: widget.events,
-                              timeColumnWidth: widget.timeColumnWidth,
-                              categories: widget.categories,
-                              verticalDivider: widget.verticalDivider,
-                              timeGap: widget.timeGap,
-                              heightPerMin: widget.heightPerMin,
-                              timeTextStyle: widget.timeTextStyle,
-                              eventBuilder: widget.eventBuilder,
-                              horizontalDivider: widget.horizontalDivider,
-                              onTileTap: widget.onTileTap,
+                          child: SingleChildScrollView(
+                            controller: _horizScrollController,
+                            clipBehavior: Clip.none,
+                            scrollDirection: Axis.horizontal,
+                            child: SizedBox(
+                              width: totalWidth + widget.timeColumnWidth,
+                              child: _DayViewBody(
+                                timeList: timeList,
+                                rowHeight: rowHeight,
+                                tileWidth: tileWidth,
+                                evenRowColor: widget.evenRowColor,
+                                oddRowColor: widget.oddRowColor,
+                                rowBuilder: widget.backgroundTimeTileBuilder,
+                                events: widget.events,
+                                timeColumnWidth: widget.timeColumnWidth,
+                                categories: widget.categories,
+                                verticalDivider: widget.verticalDivider,
+                                timeGap: widget.timeGap,
+                                heightPerMin: widget.heightPerMin,
+                                timeTextStyle: widget.timeTextStyle,
+                                eventBuilder: widget.eventBuilder,
+                                horizontalDivider: widget.horizontalDivider,
+                                onTileTap: widget.onTileTap,
+                              ),
                             ),
                           ),
                         ),
@@ -311,7 +322,6 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
           evenRowColor: evenRowColor,
           rowHeight: rowHeight,
           timeList: timeList,
-          // rowBuilder: rowBuilder,
         ),
         ListView.separated(
           separatorBuilder: (context, index) =>
@@ -362,7 +372,7 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
               if (cateIndex == -1) return const SizedBox.shrink();
 
               final constraints = BoxConstraints(
-                maxHeight: event.durationInMins.toDouble(),
+                maxHeight: event.durationInMins.toDouble() * heightPerMin,
                 maxWidth: tileWidth,
               );
 
