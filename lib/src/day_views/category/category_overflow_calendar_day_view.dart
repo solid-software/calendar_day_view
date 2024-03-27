@@ -5,9 +5,18 @@ import 'package:flutter/material.dart';
 import '../../../calendar_day_view.dart';
 import '../../models/typedef.dart';
 import '../../utils/date_time_utils.dart';
-import 'widgets/category_title_row.dart';
 import 'widgets/time_and_logo_widget.dart';
 import 'widgets/time_row_background.dart';
+
+typedef TitleRowBuilder = Widget Function({
+  required double rowHeight,
+  required List<EventCategory> categories,
+  required double tileWidth,
+  required double timeColumnWidth,
+  BoxDecoration? headerDecoration,
+  VerticalDivider? verticalDivider,
+  Widget? logo,
+});
 
 ///CategoryOverflowCalendarDayView
 ///
@@ -38,7 +47,12 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
     this.columnsPerPage = 3,
     this.controlBarBuilder,
     this.backgroundTimeTileBuilder,
-  }) : super(key: key);
+    this.titleRowBuilder,
+    int? tableHeightInterval,
+  })  : tableHeightInterval = tableHeightInterval ?? timeGap,
+        super(key: key);
+
+  final TitleRowBuilder? titleRowBuilder;
 
   /// List of category
   final List<EventCategory> categories;
@@ -63,6 +77,8 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
   /// This will determine the minimum height of a row
   /// row height is calculated by `rowHeight = heightPerMin * timeGap`
   final int timeGap;
+
+  final int tableHeightInterval;
 
   /// height in pixel per minute
   final double heightPerMin;
@@ -158,44 +174,11 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                 ScrollConfiguration.of(context).copyWith(scrollbars: false),
             child: Column(
               children: [
-                (widget.controlBarBuilder != null)
-                    ? widget.controlBarBuilder!(
-                        () => goBack(rowLength, totalWidth),
-                        () => goNext(rowLength, totalWidth),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton.filledTonal(
-                            onPressed: () => goBack(rowLength, totalWidth),
-                            icon: const Icon(Icons.arrow_left),
-                          ),
-                          Text(widget.currentDate.toString().split(":").first),
-                          IconButton.filledTonal(
-                            onPressed: () => goNext(rowLength, totalWidth),
-                            icon: const Icon(Icons.arrow_right),
-                          ),
-                        ],
-                      ),
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const ClampingScrollPhysics(),
                     child: Row(
                       children: [
-                        //TIME LABELS COLUMN
-                        TimeAndLogoWidget(
-                          rowHeight: rowHeight,
-                          timeColumnWidth: widget.timeColumnWidth,
-                          timeList: timeList,
-                          evenRowColor: widget.evenRowColor,
-                          oddRowColor: widget.oddRowColor,
-                          headerDecoration: widget.headerDecoration,
-                          horizontalDivider: widget.horizontalDivider,
-                          verticalDivider: widget.verticalDivider,
-                          logo: widget.logo,
-                          timeTextStyle: widget.timeTextStyle,
-                        ),
                         // EVENT VIEW
                         Expanded(
                           child: ClipPath(
@@ -207,15 +190,32 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                               physics: const ClampingScrollPhysics(),
                               // physics: const NeverScrollableScrollPhysics(),
                               child: SizedBox(
-                                width: totalWidth,
+                                width: totalWidth + widget.timeColumnWidth,
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
+                                    Positioned(
+                                      top: rowHeight,
+                                      child: TimeAndLogoWidget(
+                                        rowHeight: rowHeight,
+                                        timeColumnWidth: widget.timeColumnWidth,
+                                        timeList: timeList,
+                                        evenRowColor: widget.evenRowColor,
+                                        oddRowColor: widget.oddRowColor,
+                                        headerDecoration:
+                                            widget.headerDecoration,
+                                        horizontalDivider:
+                                            widget.horizontalDivider,
+                                        verticalDivider: widget.verticalDivider,
+                                        logo: widget.logo,
+                                        timeTextStyle: widget.timeTextStyle,
+                                      ),
+                                    ),
                                     Column(
                                       children: [
                                         widget.horizontalDivider ??
                                             const Divider(height: 0),
-                                        CategoryTitleRow(
+                                        widget.titleRowBuilder!.call(
                                           rowHeight: rowHeight,
                                           verticalDivider:
                                               widget.verticalDivider,
@@ -229,27 +229,31 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                                         ),
                                         widget.horizontalDivider ??
                                             const Divider(height: 0),
-                                        _DayViewBody(
-                                          timeList: timeList,
-                                          rowHeight: rowHeight,
-                                          tileWidth: tileWidth,
-                                          evenRowColor: widget.evenRowColor,
-                                          oddRowColor: widget.oddRowColor,
-                                          rowBuilder:
-                                              widget.backgroundTimeTileBuilder,
-                                          events: widget.events,
-                                          timeColumnWidth:
-                                              widget.timeColumnWidth,
-                                          categories: widget.categories,
-                                          verticalDivider:
-                                              widget.verticalDivider,
-                                          timeGap: widget.timeGap,
-                                          heightPerMin: widget.heightPerMin,
-                                          timeTextStyle: widget.timeTextStyle,
-                                          eventBuilder: widget.eventBuilder,
-                                          horizontalDivider:
-                                              widget.horizontalDivider,
-                                          onTileTap: widget.onTileTap,
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: widget.timeColumnWidth),
+                                          child: _DayViewBody(
+                                            timeList: timeList,
+                                            rowHeight: rowHeight,
+                                            tileWidth: tileWidth,
+                                            evenRowColor: widget.evenRowColor,
+                                            oddRowColor: widget.oddRowColor,
+                                            rowBuilder: widget
+                                                .backgroundTimeTileBuilder,
+                                            events: widget.events,
+                                            timeColumnWidth:
+                                                widget.timeColumnWidth,
+                                            categories: widget.categories,
+                                            verticalDivider:
+                                                widget.verticalDivider,
+                                            timeGap: widget.timeGap,
+                                            heightPerMin: widget.heightPerMin,
+                                            timeTextStyle: widget.timeTextStyle,
+                                            eventBuilder: widget.eventBuilder,
+                                            horizontalDivider:
+                                                widget.horizontalDivider,
+                                            onTileTap: widget.onTileTap,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -361,33 +365,26 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: timeList.length,
           itemBuilder: (context, index) {
-            final time = timeList.elementAt(index);
-
-            return IntrinsicHeight(
+            return ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: rowHeight),
               child: Row(
                 children: [
                   ...categories.map(
                     (c) => [
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: (onTileTap == null)
-                            ? null
-                            : () => onTileTap!(c, time),
-                        child: SizedBox(
-                          height: rowHeight,
-                          width: tileWidth,
-                          child: rowBuilder?.call(
-                                context,
-                                BoxConstraints(
-                                  maxHeight: rowHeight,
-                                  maxWidth: tileWidth,
-                                ),
-                                time,
-                                c,
-                                index % 2 != 0,
-                              ) ??
-                              const SizedBox.shrink(),
-                        ),
+                      SizedBox(
+                        height: rowHeight,
+                        width: tileWidth,
+                        child: rowBuilder?.call(
+                              context,
+                              BoxConstraints(
+                                maxHeight: rowHeight,
+                                maxWidth: tileWidth,
+                              ),
+                              DateTime.now(),
+                              c,
+                              index % 2 != 0,
+                            ) ??
+                            const SizedBox.shrink(),
                       ),
                       verticalDivider ?? const VerticalDivider(width: 0),
                     ],

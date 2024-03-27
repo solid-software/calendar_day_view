@@ -32,35 +32,34 @@ class TimeAndLogoWidget extends StatelessWidget {
       width: timeColumnWidth,
       child: Column(
         children: [
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: timeColumnWidth,
-                    minWidth: timeColumnWidth,
-                    minHeight: rowHeight,
-                  ),
-                  child: logo ??
-                      Container(
-                        decoration: headerDecoration,
-                      ),
-                ),
-                verticalDivider ?? const VerticalDivider(width: 0),
-              ],
-            ),
-          ),
+          // IntrinsicHeight(
+          //   child: Row(
+          //     children: [
+          //       ConstrainedBox(
+          //         constraints: BoxConstraints(
+          //           maxWidth: timeColumnWidth,
+          //           minWidth: timeColumnWidth,
+          //           minHeight: rowHeight,
+          //         ),
+          //         child: logo ??
+          //             Container(
+          //               decoration: headerDecoration,
+          //             ),
+          //       ),
+          //       verticalDivider ?? const VerticalDivider(width: 0),
+          //     ],
+          //   ),
+          // ),
           horizontalDivider ?? const Divider(height: 0),
-          ListView.separated(
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: timeList.length,
-            separatorBuilder: (context, index) =>
-                horizontalDivider ?? const Divider(height: 0),
             itemBuilder: (context, index) {
               final time = timeList.elementAt(index);
 
-              return IntrinsicHeight(
+              return ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: rowHeight),
                 key: ValueKey(time),
                 child: Row(
                   children: [
