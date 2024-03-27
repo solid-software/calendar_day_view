@@ -1,8 +1,6 @@
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../../../calendar_day_view.dart';
@@ -140,12 +138,12 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
 
 class _CategoryOverflowCalendarDayViewState<T extends Object>
     extends State<CategoryOverflowCalendarDayView<T>> {
-  final horizontalScrollLink = LinkedScrollControllerGroup();
-  late final headerScrollController = horizontalScrollLink.addAndGet();
-  late final horizScrollController = horizontalScrollLink.addAndGet();
-  final verticalScrollLink = LinkedScrollControllerGroup();
-  late final timeScrollController = verticalScrollLink.addAndGet();
-  late final vertScrollController = verticalScrollLink.addAndGet();
+  final _horizontalScrollLink = LinkedScrollControllerGroup();
+  late final _headerScrollController = _horizontalScrollLink.addAndGet();
+  late final _horizScrollController = _horizontalScrollLink.addAndGet();
+  final _verticalScrollLink = LinkedScrollControllerGroup();
+  late final _timeScrollController = _verticalScrollLink.addAndGet();
+  late final _vertScrollController = _verticalScrollLink.addAndGet();
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +157,7 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
     );
 
     final rowHeight = widget.heightPerMin * widget.timeGap;
+
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -175,7 +174,7 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
           return Column(
             children: [
               SingleChildScrollView(
-                controller: headerScrollController,
+                controller: _headerScrollController,
                 clipBehavior: Clip.none,
                 scrollDirection: Axis.horizontal,
                 child: widget.titleRowBuilder!.call(
@@ -192,7 +191,7 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                 child: Row(
                   children: [
                     SingleChildScrollView(
-                      controller: timeScrollController,
+                      controller: _timeScrollController,
                       child: TimeAndLogoWidget(
                         rowHeight: rowHeight,
                         timeColumnWidth: widget.timeColumnWidth,
@@ -208,10 +207,10 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                     ),
                     Expanded(
                       child: SingleChildScrollView(
-                        controller: vertScrollController,
+                        controller: _vertScrollController,
                         clipBehavior: Clip.none,
                         child: SingleChildScrollView(
-                          controller: horizScrollController,
+                          controller: _horizScrollController,
                           clipBehavior: Clip.none,
                           scrollDirection: Axis.horizontal,
                           child: SizedBox(
