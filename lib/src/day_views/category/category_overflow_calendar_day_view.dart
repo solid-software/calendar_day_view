@@ -1,15 +1,12 @@
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import '../../../calendar_day_view.dart';
 import '../../models/typedef.dart';
 import '../../utils/date_time_utils.dart';
 import 'widgets/time_and_logo_widget.dart';
-import 'widgets/time_row_background.dart';
 
 typedef TitleRowBuilder = Widget Function({
   required double rowHeight,
@@ -51,9 +48,16 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
     this.controlBarBuilder,
     this.backgroundTimeTileBuilder,
     this.titleRowBuilder,
+    this.tableBodyBorder,
+    this.timeColumnBorder,
+    required this.columnWidth,
     int? tableHeightInterval,
   })  : tableHeightInterval = tableHeightInterval ?? timeGap,
         super(key: key);
+
+  final Border? tableBodyBorder;
+  final Border? timeColumnBorder;
+  final double columnWidth;
 
   final TitleRowBuilder? titleRowBuilder;
 
@@ -163,22 +167,22 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final rowLength = constraints.maxWidth - widget.timeColumnWidth;
-
-          final tileWidth = widget.allowHorizontalScroll
-              ? rowLength / widget.columnsPerPage
-              : rowLength / widget.categories.length;
+          final tileWidth = widget.columnWidth;
+          final rowLength =
+              tileWidth * widget.categories.length - widget.timeColumnWidth;
 
           final totalWidth = widget.allowHorizontalScroll
               ? tileWidth * widget.categories.length
               : rowLength;
 
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 height: rowHeight,
                 child: SingleChildScrollView(
                   controller: _headerScrollController,
+                  physics: const ClampingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   child: widget.titleRowBuilder!.call(
                     rowHeight: rowHeight,
@@ -196,52 +200,67 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                   children: [
                     ClipPath(
                       clipper: VerticalClipper(),
-                      child: SingleChildScrollView(
-                        controller: _timeScrollController,
-                        clipBehavior: Clip.none,
-                        child: TimeAndLogoWidget(
-                          rowHeight: rowHeight,
-                          timeColumnWidth: widget.timeColumnWidth,
-                          timeList: timeList,
-                          evenRowColor: widget.evenRowColor,
-                          oddRowColor: widget.oddRowColor,
-                          headerDecoration: widget.headerDecoration,
-                          horizontalDivider: widget.horizontalDivider,
-                          verticalDivider: widget.verticalDivider,
-                          logo: widget.logo,
-                          timeTextStyle: widget.timeTextStyle,
+                      child: DecoratedBox(
+                        decoration:
+                            BoxDecoration(border: widget.timeColumnBorder),
+                        child: SizedBox(
+                          width: widget.timeColumnWidth,
+                          child: SingleChildScrollView(
+                            physics: const ClampingScrollPhysics(),
+                            controller: _timeScrollController,
+                            clipBehavior: Clip.none,
+                            child: TimeAndLogoWidget(
+                              rowHeight: rowHeight,
+                              timeColumnWidth: widget.timeColumnWidth,
+                              timeList: timeList,
+                              evenRowColor: widget.evenRowColor,
+                              oddRowColor: widget.oddRowColor,
+                              headerDecoration: widget.headerDecoration,
+                              horizontalDivider: widget.horizontalDivider,
+                              verticalDivider: widget.verticalDivider,
+                              logo: widget.logo,
+                              timeTextStyle: widget.timeTextStyle,
+                              heightPerMin: widget.heightPerMin,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     Expanded(
                       child: ClipPath(
                         clipper: VerticalClipper(),
-                        child: SingleChildScrollView(
-                          controller: _vertScrollController,
-                          clipBehavior: Clip.none,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                              border: widget.tableBodyBorder,
+                              color: Colors.black),
                           child: SingleChildScrollView(
-                            controller: _horizScrollController,
+                            controller: _vertScrollController,
                             clipBehavior: Clip.none,
-                            scrollDirection: Axis.horizontal,
-                            child: SizedBox(
-                              width: totalWidth + widget.timeColumnWidth,
-                              child: _DayViewBody(
-                                timeList: timeList,
-                                rowHeight: rowHeight,
-                                tileWidth: tileWidth,
-                                evenRowColor: widget.evenRowColor,
-                                oddRowColor: widget.oddRowColor,
-                                rowBuilder: widget.backgroundTimeTileBuilder,
-                                events: widget.events,
-                                timeColumnWidth: widget.timeColumnWidth,
-                                categories: widget.categories,
-                                verticalDivider: widget.verticalDivider,
-                                timeGap: widget.timeGap,
-                                heightPerMin: widget.heightPerMin,
-                                timeTextStyle: widget.timeTextStyle,
-                                eventBuilder: widget.eventBuilder,
-                                horizontalDivider: widget.horizontalDivider,
-                                onTileTap: widget.onTileTap,
+                            physics: const ClampingScrollPhysics(),
+                            child: SingleChildScrollView(
+                              controller: _horizScrollController,
+                              clipBehavior: Clip.none,
+                              physics: const ClampingScrollPhysics(),
+                              scrollDirection: Axis.horizontal,
+                              child: SizedBox(
+                                width: totalWidth,
+                                child: _DayViewBody(
+                                  timeList: timeList,
+                                  rowHeight: rowHeight,
+                                  tileWidth: tileWidth,
+                                  evenRowColor: widget.evenRowColor,
+                                  oddRowColor: widget.oddRowColor,
+                                  rowBuilder: widget.backgroundTimeTileBuilder,
+                                  events: widget.events,
+                                  categories: widget.categories,
+                                  verticalDivider: widget.verticalDivider,
+                                  timeGap: widget.timeGap,
+                                  heightPerMin: widget.heightPerMin,
+                                  timeTextStyle: widget.timeTextStyle,
+                                  eventBuilder: widget.eventBuilder,
+                                  horizontalDivider: widget.horizontalDivider,
+                                  onTileTap: widget.onTileTap,
+                                ),
                               ),
                             ),
                           ),
@@ -292,7 +311,6 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
     required this.eventBuilder,
     required this.categories,
     this.onTileTap,
-    required this.timeColumnWidth,
   });
 
   final List<DateTime> timeList;
@@ -310,85 +328,93 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
   final CategoryDayViewEventBuilder<T> eventBuilder;
   final List<EventCategory> categories;
   final CategoryDayViewTileTap? onTileTap;
-  final double timeColumnWidth;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        TimeRowBackground(
-          oddRowColor: oddRowColor,
-          evenRowColor: evenRowColor,
-          rowHeight: rowHeight,
-          timeList: timeList,
-        ),
-        ListView.separated(
-          separatorBuilder: (context, index) =>
-              horizontalDivider ?? const Divider(height: 0),
-          clipBehavior: Clip.none,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: timeList.length,
-          itemBuilder: (context, index) {
-            return ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: rowHeight),
-              child: Row(
-                children: [
-                  ...categories.map(
-                    (c) => [
-                      SizedBox(
-                        height: rowHeight,
-                        width: tileWidth,
-                        child: rowBuilder?.call(
-                              context,
-                              BoxConstraints(
-                                maxHeight: rowHeight,
-                                maxWidth: tileWidth,
-                              ),
-                              DateTime.now(),
-                              c,
-                              index % 2 != 0,
-                            ) ??
-                            const SizedBox.shrink(),
-                      ),
-                      verticalDivider ?? const VerticalDivider(width: 0),
-                    ],
-                  )
-                ].expand((element) => element).toList(),
-              ),
-            );
-          },
-        ),
-        for (var event in events)
-          Builder(
-            builder: (context) {
-              final category =
-                  categories.firstWhereOrNull((c) => c.id == event.categoryId);
-              if (category == null) return const SizedBox.shrink();
-
-              final cateIndex =
-                  categories.indexWhere((c) => c.id == event.categoryId);
-              if (cateIndex == -1) return const SizedBox.shrink();
-
-              final constraints = BoxConstraints(
-                maxHeight: event.durationInMins.toDouble() * heightPerMin,
-                maxWidth: tileWidth,
-              );
-
-              return Positioned(
-                top: event.minutesFrom(timeList.first) * heightPerMin,
-                left: cateIndex * tileWidth,
-                child: eventBuilder(
-                  constraints,
-                  category,
-                  event.start,
-                  event,
+    return SizedBox(
+      height: rowHeight * timeList.length,
+      width: tileWidth * categories.length,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ListView.separated(
+            separatorBuilder: (context, index) =>
+                horizontalDivider ?? const Divider(height: 0),
+            clipBehavior: Clip.none,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: timeList.length,
+            itemBuilder: (context, index) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: rowHeight),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...categories.map(
+                      (c) => [
+                        SizedBox(
+                          height: rowHeight,
+                          width: tileWidth,
+                          child: rowBuilder?.call(
+                                context,
+                                BoxConstraints(
+                                  maxHeight: rowHeight,
+                                  maxWidth: tileWidth,
+                                ),
+                                DateTime.now(),
+                                c,
+                                index % 2 != 0,
+                              ) ??
+                              const SizedBox.shrink(),
+                        ),
+                        verticalDivider ?? const VerticalDivider(width: 0),
+                      ],
+                    )
+                  ].expand((element) => element).toList(),
                 ),
               );
             },
           ),
-      ],
+          for (final event in events)
+            Builder(
+              builder: (context) {
+                final category = categories
+                    .firstWhereOrNull((c) => c.id == event.categoryId);
+                if (category == null) return const SizedBox.shrink();
+
+                final cateIndex =
+                    categories.indexWhere((c) => c.id == event.categoryId);
+                if (cateIndex == -1) return const SizedBox.shrink();
+
+                final constraints = BoxConstraints(
+                  maxHeight: event.durationInMins.toDouble() * heightPerMin,
+                  maxWidth: tileWidth,
+                );
+
+                return Positioned(
+                  top: event.minutesFrom(timeList.first) * heightPerMin,
+                  left: cateIndex * tileWidth,
+                  child: eventBuilder(
+                    constraints,
+                    category,
+                    event.start,
+                    event,
+                  ),
+                );
+              },
+            ),
+          Positioned(
+            top: DateTime.now().difference(timeList.first).inMinutes *
+                heightPerMin,
+            child: Container(
+              height: 1,
+              constraints:
+                  BoxConstraints(minWidth: tileWidth * categories.length),
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

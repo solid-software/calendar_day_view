@@ -194,6 +194,7 @@ class _CategoryCalendarDayViewState<T extends Object>
                           verticalDivider: widget.verticalDivider,
                           logo: widget.logo,
                           timeTextStyle: widget.timeTextStyle,
+                          heightPerMin: widget.heightPerMin,
                         ),
                         Expanded(
                           child: SingleChildScrollView(
