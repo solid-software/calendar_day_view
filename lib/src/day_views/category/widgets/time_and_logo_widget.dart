@@ -1,3 +1,4 @@
+import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
 
 class TimeColumn extends StatelessWidget {
@@ -14,6 +15,7 @@ class TimeColumn extends StatelessWidget {
     required this.oddRowColor,
     this.timeTextStyle,
     required this.heightPerMin,
+    required this.clock,
   });
 
   final double rowHeight;
@@ -27,10 +29,9 @@ class TimeColumn extends StatelessWidget {
   final Color? oddRowColor;
   final TextStyle? timeTextStyle;
   final double heightPerMin;
-
+  final ValueGetter<DateTime> clock;
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
     return Stack(
       children: [
         ListView.builder(
@@ -67,19 +68,32 @@ class TimeColumn extends StatelessWidget {
             );
           },
         ),
-        Positioned(
-          top: DateTime.now().difference(timeList.first).inMinutes *
-              heightPerMin - 8,
-          child: Container(
-            height: 16,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              color: Colors.white
-            ),
-            constraints:
-                BoxConstraints(minWidth: timeColumnWidth),
-            child: Center(child: Text('${now.hour}:${now.minute}', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.w600),)),
-          ),
+        TimedRebuilder(
+          rebuildInterval: const Duration(seconds: 1),
+          builder: (context) {
+            final now = clock();
+            return Positioned(
+              top: now.difference(timeList.first).inMinutes * heightPerMin - 8,
+              child: Container(
+                height: 16,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.white,
+                ),
+                constraints: BoxConstraints(minWidth: timeColumnWidth),
+                child: Center(
+                  child: Text(
+                    '${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

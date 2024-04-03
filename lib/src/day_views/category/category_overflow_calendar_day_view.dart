@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
+import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
@@ -87,12 +88,14 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
     this.groupingStrategy,
     this.groupLayoutStrategy,
     required this.minColumnWidth,
-  }) : super(key: key);
+    ValueGetter<DateTime>? clock,
+  })  : clock = clock ?? DateTime.now,
+        super(key: key);
 
   final Border? tableBodyBorder;
   final Border? timeColumnBorder;
   final double minColumnWidth;
-
+  final ValueGetter<DateTime> clock;
   final GroupingStrategy<T>? groupingStrategy;
   final GroupLayoutStrategy<T>? groupLayoutStrategy;
 
@@ -240,6 +243,7 @@ class _CategoryOverflowCalendarDayViewState<T>
                               verticalDivider: widget.verticalDivider,
                               timeTextStyle: widget.timeTextStyle,
                               heightPerMin: widget.heightPerMin,
+                              clock: widget.clock,
                             ),
                           ),
                         ),
@@ -283,6 +287,7 @@ class _CategoryOverflowCalendarDayViewState<T>
                                       NoGroupingStrategy<T>(),
                                   groupLayoutStrategy:
                                       widget.groupLayoutStrategy,
+                                  clock: widget.clock,
                                 ),
                               ),
                             ),
@@ -318,24 +323,25 @@ class VerticalClipper extends CustomClipper<Path> {
 
 class _DayViewBody<T> extends StatelessWidget {
   const _DayViewBody({
-    super.key,
     required this.timeList,
     required this.rowHeight,
     required this.tileWidth,
-    this.evenRowColor,
-    this.oddRowColor,
-    this.rowBuilder,
     required this.events,
     required this.timeGap,
     required this.heightPerMin,
+    required this.eventBuilder,
+    required this.categories,
+    required this.clock,
+    this.groupingStrategy = const NoGroupingStrategy(),
+    this.groupLayoutStrategy,
+    this.evenRowColor,
+    this.oddRowColor,
+    this.rowBuilder,
     this.timeTextStyle,
     this.verticalDivider,
     this.horizontalDivider,
-    required this.eventBuilder,
-    required this.categories,
     this.onTileTap,
-    this.groupingStrategy = const NoGroupingStrategy(),
-    this.groupLayoutStrategy,
+    super.key,
   });
 
   final List<DateTime> timeList;
@@ -353,9 +359,9 @@ class _DayViewBody<T> extends StatelessWidget {
   final CategoryDayViewEventBuilder<T> eventBuilder;
   final List<EventCategory> categories;
   final CategoryDayViewTileTap? onTileTap;
-
   final GroupingStrategy<T> groupingStrategy;
   final GroupLayoutStrategy<T>? groupLayoutStrategy;
+  final ValueGetter<DateTime> clock;
 
   @override
   Widget build(BuildContext context) {
@@ -408,13 +414,8 @@ class _DayViewBody<T> extends StatelessWidget {
           for (final event in nonGrouped)
             Builder(
               builder: (context) {
-                final category = categories
-                    .firstWhereOrNull((c) => c.id == event.categoryId);
-                if (category == null) return const SizedBox.shrink();
-
-                final cateIndex =
-                    categories.indexWhere((c) => c.id == event.categoryId);
-                if (cateIndex == -1) return const SizedBox.shrink();
+                final (category, cateIndex) = categories
+                    .firstWhereIndexed((c) => c.id == event.categoryId);
 
                 final constraints = BoxConstraints(
                   maxHeight: event.durationInMins.toDouble() * heightPerMin,
@@ -436,13 +437,8 @@ class _DayViewBody<T> extends StatelessWidget {
           for (final group in grouped)
             Builder(
               builder: (context) {
-                final category = categories
-                    .firstWhereOrNull((c) => c.id == group.categoryId);
-                if (category == null) return const SizedBox.shrink();
-
-                final cateIndex =
-                    categories.indexWhere((c) => c.id == group.categoryId);
-                if (cateIndex == -1) return const SizedBox.shrink();
+                final (category, cateIndex) = categories
+                    .firstWhereIndexed((c) => c.id == group.categoryId);
 
                 final constraints = BoxConstraints(
                   maxHeight: group.durationInMins.toDouble() * heightPerMin,
@@ -463,15 +459,21 @@ class _DayViewBody<T> extends StatelessWidget {
                 );
               },
             ),
-          Positioned(
-            top: DateTime.now().difference(timeList.first).inMinutes *
-                heightPerMin,
-            child: Container(
-              height: 1,
-              constraints:
-                  BoxConstraints(minWidth: tileWidth * categories.length),
-              color: Colors.white,
-            ),
+          TimedRebuilder(
+            rebuildInterval: const Duration(seconds: 1),
+            builder: (context) {
+              final now = clock();
+
+              return Positioned(
+                top: now.difference(timeList.first).inMinutes * heightPerMin,
+                child: Container(
+                  height: 1,
+                  constraints:
+                      BoxConstraints(minWidth: tileWidth * categories.length),
+                  color: Colors.white,
+                ),
+              );
+            },
           ),
         ],
       ),
