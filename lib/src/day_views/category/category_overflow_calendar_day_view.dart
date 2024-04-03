@@ -378,19 +378,6 @@ class _DayViewBody<T> extends StatelessWidget {
   final GroupingStrategy<T> groupingStrategy;
   final GroupLayoutStrategy<T>? groupLayoutStrategy;
 
-  Iterable<List<CategorizedDayEvent<T>>> _splitIntoCategories() {
-    final groups = <String, List<CategorizedDayEvent<T>>>{};
-
-    for (final e in events) {
-      groups.update(
-        e.categoryId,
-        (events) => [...events, e],
-        ifAbsent: () => [e],
-      );
-    }
-    return groups.values;
-  }
-
   @override
   Widget build(BuildContext context) {
     final (:grouped, :nonGrouped) = groupingStrategy.groupEvents(events);
