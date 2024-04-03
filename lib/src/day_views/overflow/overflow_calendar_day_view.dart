@@ -12,7 +12,7 @@ import '../../widgets/background_ignore_pointer.dart';
 import '../../widgets/current_time_line_widget.dart';
 import 'widgets/overflow_list_view_row.dart';
 
-class OverFlowCalendarDayView<T extends Object> extends StatefulWidget
+class OverFlowCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
   const OverFlowCalendarDayView({
     Key? key,
@@ -109,7 +109,7 @@ class OverFlowCalendarDayView<T extends Object> extends StatefulWidget
       _OverFlowCalendarDayViewState<T>();
 }
 
-class _OverFlowCalendarDayViewState<T extends Object>
+class _OverFlowCalendarDayViewState<T>
     extends State<OverFlowCalendarDayView<T>> {
   List<OverflowEventsRow<T>> _overflowEvents = [];
 

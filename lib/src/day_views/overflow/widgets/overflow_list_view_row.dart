@@ -6,7 +6,7 @@ import '../../../models/overflow_event.dart';
 import '../../../models/typedef.dart';
 import '../../../widgets/background_ignore_pointer.dart';
 
-class OverflowListViewRow<T extends Object> extends StatefulWidget {
+class OverflowListViewRow<T> extends StatefulWidget {
   const OverflowListViewRow({
     Key? key,
     required this.oEvents,
@@ -36,7 +36,7 @@ class OverflowListViewRow<T extends Object> extends StatefulWidget {
   State<OverflowListViewRow<T>> createState() => _OverflowListViewRowState<T>();
 }
 
-class _OverflowListViewRowState<T extends Object>
+class _OverflowListViewRowState<T>
     extends State<OverflowListViewRow<T>> {
   late ScrollController _scrollCtrl;
   bool _atEndOfList = true;

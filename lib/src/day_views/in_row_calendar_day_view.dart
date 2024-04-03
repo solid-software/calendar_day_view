@@ -12,7 +12,7 @@ import '../widgets/current_time_line_widget.dart';
 ///
 /// ex: if [timeGap] is 15, the events that have start time from `10:00` to `10:15`
 /// will be displayed in the same row.
-class InRowCalendarDayView<T extends Object> extends StatefulWidget
+class InRowCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
   const InRowCalendarDayView({
     Key? key,
@@ -90,7 +90,7 @@ class InRowCalendarDayView<T extends Object> extends StatefulWidget
   State<InRowCalendarDayView> createState() => _InRowCalendarDayViewState<T>();
 }
 
-class _InRowCalendarDayViewState<T extends Object>
+class _InRowCalendarDayViewState<T>
     extends State<InRowCalendarDayView<T>> {
   List<DateTime> _timesInDay = [];
   double _heightPerMin = 1;

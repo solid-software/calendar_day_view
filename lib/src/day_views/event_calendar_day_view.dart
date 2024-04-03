@@ -8,7 +8,7 @@ import 'calendar_day_view_base.dart';
 ///
 /// this day view doesn't display with a fixed time gap
 /// it listed and sorted by the time that the events start
-class EventCalendarDayView<T extends Object> extends StatefulWidget
+class EventCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
   const EventCalendarDayView({
     Key? key,
@@ -56,7 +56,7 @@ class EventCalendarDayView<T extends Object> extends StatefulWidget
   State<EventCalendarDayView> createState() => _EventCalendarDayViewState<T>();
 }
 
-class _EventCalendarDayViewState<T extends Object>
+class _EventCalendarDayViewState<T>
     extends State<EventCalendarDayView<T>> {
   List<DateTime> _timesInDay = [];
 

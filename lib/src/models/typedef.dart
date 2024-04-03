@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../calendar_day_view.dart';
 
-typedef DayViewItemBuilder<T extends Object> = Widget Function(
+typedef DayViewItemBuilder<T> = Widget Function(
   BuildContext context,
   BoxConstraints constraints,
 
@@ -11,13 +11,13 @@ typedef DayViewItemBuilder<T extends Object> = Widget Function(
   DayEvent<T> event,
 );
 
-typedef DayViewTimeRowBuilder<T extends Object> = Widget Function(
+typedef DayViewTimeRowBuilder<T> = Widget Function(
   BuildContext context,
   BoxConstraints constraints,
   List<DayEvent<T>> events,
 );
 
-typedef EventDayViewItemBuilder<T extends Object> = Widget Function(
+typedef EventDayViewItemBuilder<T> = Widget Function(
   BuildContext context,
   int itemIndex,
   DayEvent<T> event,
@@ -39,18 +39,18 @@ typedef CategoryBackgroundTimeTileBuilder = Widget Function(
 
 typedef OnTimeTap = Function(DateTime time);
 
-typedef CategoryDayViewEventBuilder<T extends Object> = Widget Function(
+typedef CategoryDayViewEventBuilder<T> = Widget Function(
   BoxConstraints constraints,
   EventCategory category,
   DateTime time,
   CategorizedDayEvent<T> event,
 );
-typedef CategoryDayViewRowBuilder<T extends Object> = Widget Function(
+typedef CategoryDayViewRowBuilder<T> = Widget Function(
   List<EventCategory> category,
   List<CategorizedDayEvent<T>> events,
   DateTime time,
 );
-typedef CategoryDayViewTileTap<T extends Object> = Function(
+typedef CategoryDayViewTileTap<T> = Function(
   EventCategory category,
   DateTime time,
 );

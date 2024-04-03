@@ -12,7 +12,7 @@ import 'widgets/time_and_logo_widget.dart';
 /// where day view is divided into multiple category with fixed time slot.
 /// events will be showed within the correspond event tile only.
 
-class CategoryCalendarDayView<T extends Object> extends StatefulWidget
+class CategoryCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
   const CategoryCalendarDayView({
     Key? key,
@@ -114,7 +114,7 @@ class CategoryCalendarDayView<T extends Object> extends StatefulWidget
       _CategoryCalendarDayViewState<T>();
 }
 
-class _CategoryCalendarDayViewState<T extends Object>
+class _CategoryCalendarDayViewState<T>
     extends State<CategoryCalendarDayView<T>> {
   late ScrollController controller;
   @override

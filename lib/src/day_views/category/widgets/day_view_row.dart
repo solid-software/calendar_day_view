@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../calendar_day_view.dart';
 import '../../../models/typedef.dart';
 
-class OverflowDayViewRow<T extends Object> extends StatelessWidget {
+class OverflowDayViewRow<T> extends StatelessWidget {
   const OverflowDayViewRow({
     super.key,
     required this.heightPerMin,
@@ -125,7 +125,7 @@ class OverflowDayViewRow<T extends Object> extends StatelessWidget {
   }
 }
 
-class DayViewRow<T extends Object> extends StatelessWidget {
+class DayViewRow<T> extends StatelessWidget {
   const DayViewRow({
     super.key,
     required this.time,

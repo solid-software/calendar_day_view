@@ -7,7 +7,7 @@ import '../models/overflow_event.dart';
 /// where each row contains multiple DayEvent that happen overlap each other
 /// in the time range of a row.
 
-List<OverflowEventsRow<T>> processOverflowEvents<T extends Object>(
+List<OverflowEventsRow<T>> processOverflowEvents<T>(
   List<DayEvent<T>> sortedEvents, {
   required DateTime startOfDay,
   required DateTime endOfDay,

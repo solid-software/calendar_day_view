@@ -1,10 +1,9 @@
-import 'package:calendar_day_view/src/day_views/category/category_overflow_calendar_day_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../calendar_day_view.dart';
 import '../models/typedef.dart';
 
-abstract class CalendarDayView<T extends Object> extends Widget {
+abstract class CalendarDayView<T> extends Widget {
   /// Create [OverFlowCalendarDayView]
   ///
   /// where event widget can be display overflowed to other time row
@@ -109,62 +108,62 @@ abstract class CalendarDayView<T extends Object> extends Widget {
   ///
   /// where day view is divided into multiple category with fixed time slot.
   /// event can be display overflowed into different time slot but within the same category column
-  factory CalendarDayView.categoryOverflow({
-    required List<CategorizedDayEvent<T>> events,
-    required DateTime currentDate,
-    required List<EventCategory> categories,
-    required CategoryDayViewEventBuilder<T> eventBuilder,
-    double? timeColumnWidth,
-    TimeOfDay? startOfDay,
-    TimeOfDay? endOfDay,
-    int? timeGap,
-    double? heightPerMin,
-    bool? allowHorizontalScroll,
-    double? columnsPerPage,
-    Color? evenRowColor,
-    Color? oddRowColor,
-    VerticalDivider? verticalDivider,
-    Divider? horizontalDivider,
-    TextStyle? timeTextStyle,
-    CategoryDayViewTileTap? onTileTap,
-    BoxDecoration? headerDecoration,
-    Widget? logo,
-    CategoryDayViewControlBarBuilder? controlBarBuilder,
-    CategoryBackgroundTimeTileBuilder? backgroundTimeTileBuilder,
-    TitleRowBuilder? titleRowBuilder,
-    Border? tableBodyBorder,
-    Border? timeColumnBorder,
-    int? tableHeightInterval,
-    required double columnWidth,
-  }) =>
-      CategoryOverflowCalendarDayView(
-        events: events,
-        currentDate: currentDate,
-        categories: categories,
-        timeColumnWidth: timeColumnWidth ?? 50,
-        heightPerMin: heightPerMin ?? 1.0,
-        startOfDay: startOfDay ?? const TimeOfDay(hour: 7, minute: 00),
-        endOfDay: endOfDay ?? const TimeOfDay(hour: 17, minute: 00),
-        eventBuilder: eventBuilder,
-        timeGap: timeGap ?? 60,
-        allowHorizontalScroll: allowHorizontalScroll ?? false,
-        columnsPerPage: columnsPerPage ?? 3,
-        evenRowColor: evenRowColor,
-        oddRowColor: oddRowColor,
-        verticalDivider: verticalDivider,
-        horizontalDivider: horizontalDivider,
-        timeTextStyle: timeTextStyle,
-        onTileTap: onTileTap,
-        headerDecoration: headerDecoration,
-        logo: logo,
-        controlBarBuilder: controlBarBuilder,
-        backgroundTimeTileBuilder: backgroundTimeTileBuilder,
-        titleRowBuilder: titleRowBuilder,
-        tableBodyBorder: tableBodyBorder,
-        tableHeightInterval: tableHeightInterval,
-        timeColumnBorder: timeColumnBorder,
-        columnWidth: columnWidth,
-      );
+  // factory CalendarDayView.categoryOverflow({
+  //   required List<CategorizedDayEvent<T>> events,
+  //   required DateTime currentDate,
+  //   required List<EventCategory> categories,
+  //   required CategoryDayViewEventBuilder<T> eventBuilder,
+  //   double? timeColumnWidth,
+  //   TimeOfDay? startOfDay,
+  //   TimeOfDay? endOfDay,
+  //   int? timeGap,
+  //   double? heightPerMin,
+  //   bool? allowHorizontalScroll,
+  //   double? columnsPerPage,
+  //   Color? evenRowColor,
+  //   Color? oddRowColor,
+  //   VerticalDivider? verticalDivider,
+  //   Divider? horizontalDivider,
+  //   TextStyle? timeTextStyle,
+  //   CategoryDayViewTileTap? onTileTap,
+  //   BoxDecoration? headerDecoration,
+  //   Widget? logo,
+  //   CategoryDayViewControlBarBuilder? controlBarBuilder,
+  //   CategoryBackgroundTimeTileBuilder? backgroundTimeTileBuilder,
+  //   TitleRowBuilder? titleRowBuilder,
+  //   Border? tableBodyBorder,
+  //   Border? timeColumnBorder,
+  //   int? tableHeightInterval,
+  //   required double columnWidth,
+  // }) =>
+  //     CategoryOverflowCalendarDayView(
+  //       events: events,
+  //       currentDate: currentDate,
+  //       categories: categories,
+  //       timeColumnWidth: timeColumnWidth ?? 50,
+  //       heightPerMin: heightPerMin ?? 1.0,
+  //       startOfDay: startOfDay ?? const TimeOfDay(hour: 7, minute: 00),
+  //       endOfDay: endOfDay ?? const TimeOfDay(hour: 17, minute: 00),
+  //       eventBuilder: eventBuilder,
+  //       timeGap: timeGap ?? 60,
+  //       allowHorizontalScroll: allowHorizontalScroll ?? false,
+  //       columnsPerPage: columnsPerPage ?? 3,
+  //       evenRowColor: evenRowColor,
+  //       oddRowColor: oddRowColor,
+  //       verticalDivider: verticalDivider,
+  //       horizontalDivider: horizontalDivider,
+  //       timeTextStyle: timeTextStyle,
+  //       onTileTap: onTileTap,
+  //       headerDecoration: headerDecoration,
+  //       logo: logo,
+  //       controlBarBuilder: controlBarBuilder,
+  //       backgroundTimeTileBuilder: backgroundTimeTileBuilder,
+  //       titleRowBuilder: titleRowBuilder,
+  //       tableBodyBorder: tableBodyBorder,
+  //       tableHeightInterval: tableHeightInterval,
+  //       timeColumnBorder: timeColumnBorder,
+  //       columnWidth: columnWidth,
+  //     );
 
   /// Create [InRowCalendarDayView]
   ///

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'day_event.dart';
 
-class OverflowEventsRow<T extends Object> {
+class OverflowEventsRow<T> {
   final List<DayEvent<T>> events;
   final DateTime start;
   final DateTime end;

@@ -1,4 +1,4 @@
-class DayEvent<T extends Object> {
+class DayEvent<T> {
   final T value;
   final DateTime start;
   final DateTime? end;

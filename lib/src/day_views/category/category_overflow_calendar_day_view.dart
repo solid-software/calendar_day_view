@@ -18,13 +18,48 @@ typedef TitleRowBuilder = Widget Function({
   Widget? logo,
 });
 
+abstract class GroupingStrategy<T> {
+  ({List<EventGroup<T>> grouped, List<CategorizedDayEvent<T>> nonGrouped})
+      groupEvents(List<CategorizedDayEvent<T>> events);
+}
+
+class NoGroupingStrategy<T> implements GroupingStrategy<T> {
+  const NoGroupingStrategy();
+  @override
+  ({List<EventGroup<T>> grouped, List<CategorizedDayEvent<T>> nonGrouped})
+      groupEvents(List<CategorizedDayEvent<T>> events) {
+    return (grouped: <EventGroup<T>>[], nonGrouped: events);
+  }
+}
+
+class EventGroup<T> extends CategorizedDayEvent<T> {
+  final List<CategorizedDayEvent<T>> events;
+
+  EventGroup({
+    required this.events,
+    required super.categoryId,
+    required super.start,
+    required super.value,
+    required super.end,
+  });
+}
+
+abstract class GroupLayoutStrategy<T> {
+  Widget layout(
+      BoxConstraints constraints,
+      EventGroup<T> group,
+      EventCategory category,
+      double heightPerMin,
+      CategoryDayViewEventBuilder<T> eventBuilder);
+}
+
 ///CategoryOverflowCalendarDayView
 ///
 /// where day view is divided into multiple category with fixed time slot.
 /// events can be display overflowed into different time slot but within the same category column
-class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
+class CategoryOverflowCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
-  const CategoryOverflowCalendarDayView({
+  CategoryOverflowCalendarDayView({
     Key? key,
     required this.categories,
     required this.events,
@@ -50,6 +85,8 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
     this.titleRowBuilder,
     this.tableBodyBorder,
     this.timeColumnBorder,
+    this.groupingStrategy,
+    this.groupLayoutStrategy,
     required this.columnWidth,
     int? tableHeightInterval,
   })  : tableHeightInterval = tableHeightInterval ?? timeGap,
@@ -58,6 +95,9 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
   final Border? tableBodyBorder;
   final Border? timeColumnBorder;
   final double columnWidth;
+
+  final GroupingStrategy<T>? groupingStrategy;
+  final GroupLayoutStrategy<T>? groupLayoutStrategy;
 
   final TitleRowBuilder? titleRowBuilder;
 
@@ -142,7 +182,7 @@ class CategoryOverflowCalendarDayView<T extends Object> extends StatefulWidget
       _CategoryOverflowCalendarDayViewState<T>();
 }
 
-class _CategoryOverflowCalendarDayViewState<T extends Object>
+class _CategoryOverflowCalendarDayViewState<T>
     extends State<CategoryOverflowCalendarDayView<T>> {
   final _horizontalScrollLink = LinkedScrollControllerGroup();
   late final _headerScrollController = _horizontalScrollLink.addAndGet();
@@ -244,7 +284,7 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
                                 width: totalWidth,
-                                child: _DayViewBody(
+                                child: _DayViewBody<T>(
                                   timeList: timeList,
                                   rowHeight: rowHeight,
                                   tileWidth: tileWidth,
@@ -260,6 +300,9 @@ class _CategoryOverflowCalendarDayViewState<T extends Object>
                                   eventBuilder: widget.eventBuilder,
                                   horizontalDivider: widget.horizontalDivider,
                                   onTileTap: widget.onTileTap,
+                                  groupingStrategy: widget.groupingStrategy ?? NoGroupingStrategy<T>(),
+                                  groupLayoutStrategy:
+                                      widget.groupLayoutStrategy,
                                 ),
                               ),
                             ),
@@ -293,7 +336,7 @@ class VerticalClipper extends CustomClipper<Path> {
   }
 }
 
-class _DayViewBody<T extends Object> extends StatelessWidget {
+class _DayViewBody<T> extends StatelessWidget {
   const _DayViewBody({
     super.key,
     required this.timeList,
@@ -311,6 +354,8 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
     required this.eventBuilder,
     required this.categories,
     this.onTileTap,
+    this.groupingStrategy = const NoGroupingStrategy(),
+    this.groupLayoutStrategy,
   });
 
   final List<DateTime> timeList;
@@ -329,8 +374,42 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
   final List<EventCategory> categories;
   final CategoryDayViewTileTap? onTileTap;
 
+  final GroupingStrategy<T> groupingStrategy;
+  final GroupLayoutStrategy<T>? groupLayoutStrategy;
+
+  Iterable<List<CategorizedDayEvent<T>>> _splitIntoCategories() {
+    final groups = <String, List<CategorizedDayEvent<T>>>{};
+
+    for (final e in events) {
+      groups.update(
+        e.categoryId,
+        (events) => [...events, e],
+        ifAbsent: () => [e],
+      );
+    }
+    return groups.values;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final grouped = <EventGroup<T>>[];
+    final nonGrouped = <CategorizedDayEvent<T>>[];
+    final splitEvents = _splitIntoCategories();
+    print('\n\n');
+    print('splitEvents.length: ${splitEvents.length}');
+    print('splitEvents all: ${splitEvents.expand((e) => e).length}');
+    for (final categoryEvents in splitEvents) {
+      final (grouped: catGrouped, nonGrouped: catNonGrouped) =
+          groupingStrategy.groupEvents(categoryEvents);
+
+      grouped.addAll(catGrouped);
+      nonGrouped.addAll(catNonGrouped);
+      print('catNonGrouped: ${catNonGrouped.length}');
+    }
+    print('events: ${events.length}');
+    print('grouped: ${grouped.length}');
+    print('nonGrouped: ${nonGrouped.length}');
+
     return SizedBox(
       height: rowHeight * timeList.length,
       width: tileWidth * categories.length,
@@ -375,7 +454,7 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
               );
             },
           ),
-          for (final event in events)
+          for (final event in nonGrouped)
             Builder(
               builder: (context) {
                 final category = categories
@@ -400,6 +479,30 @@ class _DayViewBody<T extends Object> extends StatelessWidget {
                     event.start,
                     event,
                   ),
+                );
+              },
+            ),
+          for (final group in grouped)
+            Builder(
+              builder: (context) {
+                final category = categories
+                    .firstWhereOrNull((c) => c.id == group.categoryId);
+                if (category == null) return const SizedBox.shrink();
+
+                final cateIndex =
+                    categories.indexWhere((c) => c.id == group.categoryId);
+                if (cateIndex == -1) return const SizedBox.shrink();
+
+                final constraints = BoxConstraints(
+                  maxHeight: group.durationInMins.toDouble() * heightPerMin,
+                  maxWidth: tileWidth,
+                );
+
+                return Positioned(
+                  top: group.minutesFrom(timeList.first) * heightPerMin,
+                  left: cateIndex * tileWidth,
+                  child: groupLayoutStrategy!.layout(
+                      constraints, group, category, heightPerMin, eventBuilder),
                 );
               },
             ),
