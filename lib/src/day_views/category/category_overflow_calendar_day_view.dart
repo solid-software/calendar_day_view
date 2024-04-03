@@ -300,7 +300,8 @@ class _CategoryOverflowCalendarDayViewState<T>
                                   eventBuilder: widget.eventBuilder,
                                   horizontalDivider: widget.horizontalDivider,
                                   onTileTap: widget.onTileTap,
-                                  groupingStrategy: widget.groupingStrategy ?? NoGroupingStrategy<T>(),
+                                  groupingStrategy: widget.groupingStrategy ??
+                                      NoGroupingStrategy<T>(),
                                   groupLayoutStrategy:
                                       widget.groupLayoutStrategy,
                                 ),
@@ -392,23 +393,7 @@ class _DayViewBody<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final grouped = <EventGroup<T>>[];
-    final nonGrouped = <CategorizedDayEvent<T>>[];
-    final splitEvents = _splitIntoCategories();
-    print('\n\n');
-    print('splitEvents.length: ${splitEvents.length}');
-    print('splitEvents all: ${splitEvents.expand((e) => e).length}');
-    for (final categoryEvents in splitEvents) {
-      final (grouped: catGrouped, nonGrouped: catNonGrouped) =
-          groupingStrategy.groupEvents(categoryEvents);
-
-      grouped.addAll(catGrouped);
-      nonGrouped.addAll(catNonGrouped);
-      print('catNonGrouped: ${catNonGrouped.length}');
-    }
-    print('events: ${events.length}');
-    print('grouped: ${grouped.length}');
-    print('nonGrouped: ${nonGrouped.length}');
+    final (:grouped, :nonGrouped) = groupingStrategy.groupEvents(events);
 
     return SizedBox(
       height: rowHeight * timeList.length,
