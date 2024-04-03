@@ -52,6 +52,7 @@ abstract class GroupLayoutStrategy<T> {
       EventGroup<T> group,
       EventCategory category,
       double heightPerMin,
+      double tileWidth,
       CategoryDayViewEventBuilder<T> eventBuilder);
 }
 
@@ -452,7 +453,13 @@ class _DayViewBody<T> extends StatelessWidget {
                   top: group.minutesFrom(timeList.first) * heightPerMin,
                   left: cateIndex * tileWidth,
                   child: groupLayoutStrategy!.layout(
-                      constraints, group, category, heightPerMin, eventBuilder),
+                    constraints,
+                    group,
+                    category,
+                    heightPerMin,
+                    tileWidth,
+                    eventBuilder,
+                  ),
                 );
               },
             ),
