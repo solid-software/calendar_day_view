@@ -183,7 +183,7 @@ class _CategoryCalendarDayViewState<T>
                     physics: const ClampingScrollPhysics(),
                     child: Row(
                       children: [
-                        TimeAndLogoWidget(
+                        TimeColumn(
                           rowHeight: rowHeight,
                           timeColumnWidth: widget.timeColumnWidth,
                           timeList: timeList,

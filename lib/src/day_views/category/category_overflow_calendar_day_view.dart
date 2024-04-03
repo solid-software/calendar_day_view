@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +61,7 @@ abstract class GroupLayoutStrategy<T> {
 /// events can be display overflowed into different time slot but within the same category column
 class CategoryOverflowCalendarDayView<T> extends StatefulWidget
     implements CalendarDayView<T> {
-  CategoryOverflowCalendarDayView({
+  const CategoryOverflowCalendarDayView({
     Key? key,
     required this.categories,
     required this.events,
@@ -76,25 +78,19 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
     required this.eventBuilder,
     this.onTileTap,
     this.headerDecoration,
-    this.logo,
     this.timeColumnWidth = 50,
-    this.allowHorizontalScroll = false,
-    this.columnsPerPage = 3,
-    this.controlBarBuilder,
     this.backgroundTimeTileBuilder,
     this.titleRowBuilder,
     this.tableBodyBorder,
     this.timeColumnBorder,
     this.groupingStrategy,
     this.groupLayoutStrategy,
-    required this.columnWidth,
-    int? tableHeightInterval,
-  })  : tableHeightInterval = tableHeightInterval ?? timeGap,
-        super(key: key);
+    required this.minColumnWidth,
+  }) : super(key: key);
 
   final Border? tableBodyBorder;
   final Border? timeColumnBorder;
-  final double columnWidth;
+  final double minColumnWidth;
 
   final GroupingStrategy<T>? groupingStrategy;
   final GroupLayoutStrategy<T>? groupLayoutStrategy;
@@ -124,8 +120,6 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
   /// This will determine the minimum height of a row
   /// row height is calculated by `rowHeight = heightPerMin * timeGap`
   final int timeGap;
-
-  final int tableHeightInterval;
 
   /// height in pixel per minute
   final double heightPerMin;
@@ -162,21 +156,6 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
   /// header row decoration
   final BoxDecoration? headerDecoration;
 
-  /// The widget that will be place at top left corner tile of this day view
-  final Widget? logo;
-
-  /// if true the day view can be scrolled horizontally to show more categories
-  final bool allowHorizontalScroll;
-
-  /// number of columns per page, only affect when [allowHorizontalScroll] = true
-  final double columnsPerPage;
-
-  /// To build the controller bar on the top of the day view
-  ///
-  /// `goToPreviousTab` to animate to previous tabs
-  /// `goToNextTab` to animate to next tabs
-  final CategoryDayViewControlBarBuilder? controlBarBuilder;
-
   @override
   State<CategoryOverflowCalendarDayView<T>> createState() =>
       _CategoryOverflowCalendarDayViewState<T>();
@@ -207,19 +186,20 @@ class _CategoryOverflowCalendarDayViewState<T>
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tileWidth = widget.columnWidth;
-          final rowLength =
-              tileWidth * widget.categories.length - widget.timeColumnWidth;
+          final categoriesCount = widget.categories.length;
+          final minTileWidth = widget.minColumnWidth;
+          final minTotalWidth = minTileWidth * categoriesCount;
 
-          final totalWidth = widget.allowHorizontalScroll
-              ? tileWidth * widget.categories.length
-              : rowLength;
+          final totalWidth = max(minTotalWidth, constraints.maxWidth);
+          final rowLength = totalWidth - widget.timeColumnWidth;
+          final tileWidth = rowLength / categoriesCount;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 height: rowHeight,
+                width: totalWidth,
                 child: SingleChildScrollView(
                   controller: _headerScrollController,
                   physics: const ClampingScrollPhysics(),
@@ -231,7 +211,6 @@ class _CategoryOverflowCalendarDayViewState<T>
                     tileWidth: tileWidth,
                     headerDecoration: widget.headerDecoration,
                     timeColumnWidth: widget.timeColumnWidth,
-                    logo: widget.logo,
                   ),
                 ),
               ),
@@ -249,7 +228,7 @@ class _CategoryOverflowCalendarDayViewState<T>
                             physics: const ClampingScrollPhysics(),
                             controller: _timeScrollController,
                             clipBehavior: Clip.none,
-                            child: TimeAndLogoWidget(
+                            child: TimeColumn(
                               rowHeight: rowHeight,
                               timeColumnWidth: widget.timeColumnWidth,
                               timeList: timeList,
@@ -258,7 +237,6 @@ class _CategoryOverflowCalendarDayViewState<T>
                               headerDecoration: widget.headerDecoration,
                               horizontalDivider: widget.horizontalDivider,
                               verticalDivider: widget.verticalDivider,
-                              logo: widget.logo,
                               timeTextStyle: widget.timeTextStyle,
                               heightPerMin: widget.heightPerMin,
                             ),
@@ -283,7 +261,7 @@ class _CategoryOverflowCalendarDayViewState<T>
                               physics: const ClampingScrollPhysics(),
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
-                                width: totalWidth,
+                                width: rowLength,
                                 child: _DayViewBody<T>(
                                   timeList: timeList,
                                   rowHeight: rowHeight,

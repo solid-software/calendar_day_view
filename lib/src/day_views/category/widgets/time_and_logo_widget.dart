@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TimeAndLogoWidget extends StatelessWidget {
-  const TimeAndLogoWidget({
+class TimeColumn extends StatelessWidget {
+  const TimeColumn({
     super.key,
     required this.rowHeight,
     required this.timeColumnWidth,

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:calendar_day_view/calendar_day_view.dart';
-import 'package:example/tabs/category_overflow_day_view_tab.dart';
 import 'package:example/tabs/event_day_view_tab.dart';
 import 'package:example/tabs/in_row_day_view_tab.dart';
 import 'package:example/tabs/overflow_day_view_tab.dart';
@@ -77,19 +76,6 @@ class CalendarDayViewExample extends HookWidget {
             ),
           )
         ],
-      ),
-      CategoryOverflowDayViewTab(
-        events: categoryEvents.value,
-        categories: categories.value,
-        addEventOnClick: (cate, time) {
-          categoryEvents.value = [
-            ...categoryEvents.value,
-            CategorizedDayEvent(
-                categoryId: cate.id,
-                value: faker.conference.name(),
-                start: time)
-          ];
-        },
       ),
       CategoryDayViewTab(
         events: categoryEvents.value,
