@@ -202,7 +202,6 @@ class _CategoryOverflowCalendarDayViewState<T>
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                height: rowHeight,
                 width: totalWidth,
                 child: SingleChildScrollView(
                   controller: _headerScrollController,
