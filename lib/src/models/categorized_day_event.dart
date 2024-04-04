@@ -6,7 +6,7 @@ class CategorizedDayEvent<T> extends DayEvent<T> {
     required this.categoryId,
     required super.value,
     required super.start,
-    super.end,
+    required super.end,
     super.name,
   });
 

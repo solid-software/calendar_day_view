@@ -273,7 +273,7 @@ class _OverFlowCalendarDayViewState<T>
               final topGap = event.minutesFrom(oEvents.start) * heightUnit;
 
               final tileHeight =
-                  (widget.cropBottomEvents && event.end!.isAfter(timeEnd))
+                  (widget.cropBottomEvents && event.end.isAfter(timeEnd))
                       ? (maxHeight - topGap)
                       : (event.durationInMins * heightUnit);
 

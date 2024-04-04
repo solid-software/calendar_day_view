@@ -1,16 +1,16 @@
 class DayEvent<T> {
   final T value;
   final DateTime start;
-  final DateTime? end;
+  final DateTime end;
   final String? name;
 
   DayEvent({
     required this.value,
     required this.start,
-    this.end,
+    required this.end,
     this.name,
   }) : assert(
-          end == null || end.isAfter(start),
+          end.isAfter(start),
           "End can not be before start| start: $start |end: $end ",
         );
 
@@ -51,7 +51,7 @@ class DayEvent<T> {
 }
 
 extension DayEventExtension on DayEvent {
-  int get durationInMins => end == null ? 30 : end!.difference(start).inMinutes;
+  int get durationInMins => end.difference(start).inMinutes;
 
   int get timeGapFromZero => start.hour * 60 + start.minute;
 

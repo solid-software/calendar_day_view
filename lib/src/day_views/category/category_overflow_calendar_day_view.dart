@@ -375,43 +375,14 @@ class _DayViewBody<T> extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          ListView.separated(
-            separatorBuilder: (context, index) =>
-                horizontalDivider ?? const Divider(height: 0),
-            clipBehavior: Clip.none,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: timeList.length,
-            itemBuilder: (context, index) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: rowHeight),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...categories.map(
-                      (c) => [
-                        SizedBox(
-                          height: rowHeight,
-                          width: tileWidth,
-                          child: rowBuilder?.call(
-                                context,
-                                BoxConstraints(
-                                  maxHeight: rowHeight,
-                                  maxWidth: tileWidth,
-                                ),
-                                DateTime.now(),
-                                c,
-                                index % 2 != 0,
-                              ) ??
-                              const SizedBox.shrink(),
-                        ),
-                        verticalDivider ?? const VerticalDivider(width: 0),
-                      ],
-                    )
-                  ].expand((element) => element).toList(),
-                ),
-              );
-            },
+          _TableBackground(
+            horizontalDivider: horizontalDivider,
+            timeList: timeList,
+            rowHeight: rowHeight,
+            categories: categories,
+            tileWidth: tileWidth,
+            rowBuilder: rowBuilder,
+            verticalDivider: verticalDivider,
           ),
           for (final event in nonGrouped)
             Builder(
@@ -479,6 +450,69 @@ class _DayViewBody<T> extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TableBackground extends StatelessWidget {
+  const _TableBackground({
+    super.key,
+    required this.horizontalDivider,
+    required this.timeList,
+    required this.rowHeight,
+    required this.categories,
+    required this.tileWidth,
+    required this.rowBuilder,
+    required this.verticalDivider,
+  });
+
+  final Divider? horizontalDivider;
+  final List<DateTime> timeList;
+  final double rowHeight;
+  final List<EventCategory> categories;
+  final double tileWidth;
+  final CategoryBackgroundTimeTileBuilder? rowBuilder;
+  final VerticalDivider? verticalDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      separatorBuilder: (context, index) =>
+          horizontalDivider ?? const Divider(height: 0),
+      clipBehavior: Clip.none,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: timeList.length,
+      itemBuilder: (context, index) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: rowHeight),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...categories.map(
+                (c) => [
+                  SizedBox(
+                    height: rowHeight,
+                    width: tileWidth,
+                    child: rowBuilder?.call(
+                          context,
+                          BoxConstraints(
+                            maxHeight: rowHeight,
+                            maxWidth: tileWidth,
+                          ),
+                          DateTime.now(),
+                          c,
+                          index % 2 != 0,
+                        ) ??
+                        const SizedBox.shrink(),
+                  ),
+                  verticalDivider ?? const VerticalDivider(width: 0),
+                ],
+              )
+            ].expand((element) => element).toList(),
+          ),
+        );
+      },
     );
   }
 }
