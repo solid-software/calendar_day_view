@@ -48,6 +48,9 @@ class EventGroup<T> extends CategorizedDayEvent<T> {
 }
 
 abstract class GroupLayoutStrategy<T> {
+  const GroupLayoutStrategy();
+  bool canLayout(EventGroup<T> group) => true;
+
   Widget layout(
       BoxConstraints constraints,
       EventGroup<T> group,
