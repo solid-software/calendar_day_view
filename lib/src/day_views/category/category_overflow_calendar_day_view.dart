@@ -47,14 +47,14 @@ class EventGroup<T> extends CategorizedDayEvent<T> {
   });
 }
 
-abstract class GroupLayoutStrategy<T> {
+abstract class GroupLayoutStrategy<T, U> {
   const GroupLayoutStrategy();
   bool canLayout(EventGroup<T> group) => true;
 
   Widget layout(
       BoxConstraints constraints,
       EventGroup<T> group,
-      EventCategory<T> category,
+      EventCategory<U> category,
       double heightPerMin,
       double tileWidth,
       CategoryDayViewEventBuilder<T> eventBuilder);
@@ -64,7 +64,7 @@ abstract class GroupLayoutStrategy<T> {
 ///
 /// where day view is divided into multiple category with fixed time slot.
 /// events can be display overflowed into different time slot but within the same category column
-class CategoryOverflowCalendarDayView<T> extends StatefulWidget
+class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
     implements CalendarDayView<T> {
   const CategoryOverflowCalendarDayView({
     Key? key,
@@ -100,12 +100,12 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
   final double minColumnWidth;
   final ValueGetter<DateTime> clock;
   final GroupingStrategy<T>? groupingStrategy;
-  final GroupLayoutStrategy<T>? groupLayoutStrategy;
+  final GroupLayoutStrategy<T, U>? groupLayoutStrategy;
 
   final TitleRowBuilder? titleRowBuilder;
 
   /// List of category
-  final List<EventCategory<T>> categories;
+  final List<EventCategory<U>> categories;
 
   /// List of events
   final List<CategorizedDayEvent<T>> events;
@@ -164,12 +164,12 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
   final BoxDecoration? headerDecoration;
 
   @override
-  State<CategoryOverflowCalendarDayView<T>> createState() =>
-      _CategoryOverflowCalendarDayViewState<T>();
+  State<CategoryOverflowCalendarDayView<T, U>> createState() =>
+      _CategoryOverflowCalendarDayViewState<T, U>();
 }
 
-class _CategoryOverflowCalendarDayViewState<T>
-    extends State<CategoryOverflowCalendarDayView<T>> {
+class _CategoryOverflowCalendarDayViewState<T, U>
+    extends State<CategoryOverflowCalendarDayView<T, U>> {
   final _horizontalScrollLink = LinkedScrollControllerGroup();
   late final _headerScrollController = _horizontalScrollLink.addAndGet();
   late final _horizScrollController = _horizontalScrollLink.addAndGet();
@@ -269,7 +269,7 @@ class _CategoryOverflowCalendarDayViewState<T>
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
                                 width: rowLength,
-                                child: _DayViewBody<T>(
+                                child: _DayViewBody<T, U>(
                                   timeList: timeList,
                                   rowHeight: rowHeight,
                                   tileWidth: tileWidth,
@@ -323,7 +323,7 @@ class VerticalClipper extends CustomClipper<Path> {
   }
 }
 
-class _DayViewBody<T> extends StatelessWidget {
+class _DayViewBody<T, U> extends StatelessWidget {
   const _DayViewBody({
     required this.timeList,
     required this.rowHeight,
@@ -359,10 +359,10 @@ class _DayViewBody<T> extends StatelessWidget {
   final VerticalDivider? verticalDivider;
   final Divider? horizontalDivider;
   final CategoryDayViewEventBuilder<T> eventBuilder;
-  final List<EventCategory<T>> categories;
+  final List<EventCategory<U>> categories;
   final CategoryDayViewTileTap? onTileTap;
   final GroupingStrategy<T> groupingStrategy;
-  final GroupLayoutStrategy<T>? groupLayoutStrategy;
+  final GroupLayoutStrategy<T, U>? groupLayoutStrategy;
   final ValueGetter<DateTime> clock;
 
   @override
