@@ -1,21 +1,21 @@
-class EventCategory {
+class EventCategory<T> {
   final String id;
-  final String name;
+  final List<T> values;
   EventCategory({
     required this.id,
-    required this.name,
+    required this.values,
   });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is EventCategory && other.id == id && other.name == name;
+    return other is EventCategory && other.id == id && other.values == values;
   }
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode;
+  int get hashCode => id.hashCode ^ values.hashCode;
 
   @override
-  String toString() => 'EventCategory(id: $id, name: $name)';
+  String toString() => 'EventCategory(id: $id, value: $values)';
 }

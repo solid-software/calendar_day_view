@@ -54,7 +54,7 @@ abstract class GroupLayoutStrategy<T> {
   Widget layout(
       BoxConstraints constraints,
       EventGroup<T> group,
-      EventCategory category,
+      EventCategory<T> category,
       double heightPerMin,
       double tileWidth,
       CategoryDayViewEventBuilder<T> eventBuilder);
@@ -105,7 +105,7 @@ class CategoryOverflowCalendarDayView<T> extends StatefulWidget
   final TitleRowBuilder? titleRowBuilder;
 
   /// List of category
-  final List<EventCategory> categories;
+  final List<EventCategory<T>> categories;
 
   /// List of events
   final List<CategorizedDayEvent<T>> events;
@@ -359,7 +359,7 @@ class _DayViewBody<T> extends StatelessWidget {
   final VerticalDivider? verticalDivider;
   final Divider? horizontalDivider;
   final CategoryDayViewEventBuilder<T> eventBuilder;
-  final List<EventCategory> categories;
+  final List<EventCategory<T>> categories;
   final CategoryDayViewTileTap? onTileTap;
   final GroupingStrategy<T> groupingStrategy;
   final GroupLayoutStrategy<T>? groupLayoutStrategy;
@@ -456,7 +456,6 @@ class _DayViewBody<T> extends StatelessWidget {
 
 class _TableBackground extends StatelessWidget {
   const _TableBackground({
-    super.key,
     required this.horizontalDivider,
     required this.timeList,
     required this.rowHeight,
