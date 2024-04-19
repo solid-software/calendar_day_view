@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:timezone/timezone.dart';
 
 import '../../calendar_day_view.dart';
-import '../models/typedef.dart';
 
 abstract class CalendarDayView<T> extends Widget {
   /// Create [OverFlowCalendarDayView]
@@ -19,7 +19,7 @@ abstract class CalendarDayView<T> extends Widget {
     bool? renderRowAsListView,
     bool? showMoreOnRowButton,
     required List<DayEvent<T>> events,
-    required DateTime currentDate,
+    required TZDateTime currentDate,
     Color? timeTextColor,
     TextStyle? timeTextStyle,
     Color? dividerColor,
@@ -61,7 +61,7 @@ abstract class CalendarDayView<T> extends Widget {
   /// Show all events that are happened in the same time gap window in a single row
   factory CalendarDayView.inRow({
     required List<DayEvent<T>> events,
-    required DateTime currentDate,
+    required TZDateTime currentDate,
     TimeOfDay? startOfDay,
     TimeOfDay? endOfDay,
     Color? currentTimeLineColor,

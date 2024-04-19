@@ -5,9 +5,9 @@ import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
 import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+import 'package:timezone/timezone.dart';
 
 import '../../../calendar_day_view.dart';
-import '../../models/typedef.dart';
 import '../../utils/date_time_utils.dart';
 import 'widgets/time_and_logo_widget.dart';
 
@@ -114,7 +114,7 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
   final double timeColumnWidth;
 
   /// the date that this dayView is presenting
-  final DateTime currentDate;
+  final TZDateTime currentDate;
 
   /// To set the start time of the day view
   final TimeOfDay startOfDay;
@@ -187,6 +187,11 @@ class _CategoryOverflowCalendarDayViewState<T, U>
       timeEnd,
       widget.timeGap,
     );
+    print('timeStart: $timeStart');
+    print('timeEnd: $timeEnd');
+    print('timeList $timeList');
+    print('widget.clock()" ${widget.clock()}');
+
 
     final rowHeight = widget.heightPerMin * widget.timeGap;
 
@@ -383,6 +388,7 @@ class _DayViewBody<T, U> extends StatelessWidget {
             tileWidth: tileWidth,
             rowBuilder: rowBuilder,
             verticalDivider: verticalDivider,
+            clock: clock,
           ),
           for (final event in nonGrouped)
             Builder(
@@ -463,6 +469,7 @@ class _TableBackground extends StatelessWidget {
     required this.tileWidth,
     required this.rowBuilder,
     required this.verticalDivider,
+    required this.clock,
   });
 
   final Divider? horizontalDivider;
@@ -472,6 +479,7 @@ class _TableBackground extends StatelessWidget {
   final double tileWidth;
   final CategoryBackgroundTimeTileBuilder? rowBuilder;
   final VerticalDivider? verticalDivider;
+  final ValueGetter<DateTime> clock;
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +507,7 @@ class _TableBackground extends StatelessWidget {
                             maxHeight: rowHeight,
                             maxWidth: tileWidth,
                           ),
-                          DateTime.now(),
+                          clock(),
                           c,
                           index % 2 != 0,
                         ) ??

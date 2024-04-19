@@ -1,7 +1,9 @@
+import 'package:timezone/timezone.dart';
+
 class DayEvent<T> {
   final T value;
-  final DateTime start;
-  final DateTime end;
+  final TZDateTime start;
+  final TZDateTime end;
   final String? name;
 
   DayEvent({
@@ -16,8 +18,8 @@ class DayEvent<T> {
 
   DayEvent<T> copyWith({
     T? value,
-    DateTime? start,
-    DateTime? end,
+    TZDateTime? start,
+    TZDateTime? end,
     String? name,
   }) {
     return DayEvent<T>(

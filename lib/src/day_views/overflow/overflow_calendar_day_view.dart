@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:calendar_day_view/calendar_day_view.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/timezone.dart';
 
 import '../../models/overflow_event.dart';
 import '../../models/typedef.dart';
@@ -60,7 +61,7 @@ class OverFlowCalendarDayView<T> extends StatefulWidget
   final List<DayEvent<T>> events;
 
   /// the date that this dayView is presenting
-  final DateTime currentDate;
+  final TZDateTime currentDate;
 
   /// To set the start time of the day view
   final TimeOfDay startOfDay;
@@ -113,11 +114,11 @@ class _OverFlowCalendarDayViewState<T>
     extends State<OverFlowCalendarDayView<T>> {
   List<OverflowEventsRow<T>> _overflowEvents = [];
 
-  DateTime _currentTime = DateTime.now();
+  TZDateTime _currentTime = TZDateTime.now(local);
   Timer? _timer;
   double _rowScale = 1;
-  late DateTime timeStart;
-  late DateTime timeEnd;
+  late TZDateTime timeStart;
+  late TZDateTime timeEnd;
 
   @override
   void initState() {
@@ -136,7 +137,7 @@ class _OverFlowCalendarDayViewState<T>
     if (widget.showCurrentTimeLine) {
       _timer = Timer.periodic(const Duration(minutes: 1), (_) {
         setState(() {
-          _currentTime = DateTime.now();
+          _currentTime = TZDateTime.now(local);
         });
       });
     }

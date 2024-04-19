@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:timezone/timezone.dart';
 
 import '../../calendar_day_view.dart';
 import '../extensions/time_of_day_extension.dart';
-import '../models/typedef.dart';
 import '../utils/date_time_utils.dart';
 import '../widgets/current_time_line_widget.dart';
 
@@ -48,7 +48,7 @@ class InRowCalendarDayView<T> extends StatefulWidget
   final double heightPerMin;
 
   /// the date that this dayView is presenting
-  final DateTime currentDate;
+  final TZDateTime currentDate;
 
   /// List of events to be display in the day view
   final List<DayEvent<T>> events;
@@ -94,13 +94,13 @@ class _InRowCalendarDayViewState<T>
     extends State<InRowCalendarDayView<T>> {
   List<DateTime> _timesInDay = [];
   double _heightPerMin = 1;
-  DateTime _currentTime = DateTime.now();
+  TZDateTime _currentTime = TZDateTime.now(local);
   Timer? _timer;
   double _rowHeight = 60.0;
   double _rowScale = 1;
 
-  late DateTime timeStart;
-  late DateTime timeEnd;
+  late TZDateTime timeStart;
+  late TZDateTime timeEnd;
 
   @override
   void initState() {
@@ -116,7 +116,7 @@ class _InRowCalendarDayViewState<T>
     if (widget.showCurrentTimeLine) {
       _timer = Timer.periodic(const Duration(minutes: 1), (_) {
         setState(() {
-          _currentTime = DateTime.now();
+          _currentTime = TZDateTime.now(local);
         });
       });
     }

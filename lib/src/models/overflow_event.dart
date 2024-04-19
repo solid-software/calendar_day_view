@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
+import 'package:timezone/timezone.dart';
 
 import 'day_event.dart';
 
 class OverflowEventsRow<T> {
   final List<DayEvent<T>> events;
-  final DateTime start;
-  final DateTime end;
+  final TZDateTime start;
+  final TZDateTime end;
   OverflowEventsRow({
     required this.events,
     required this.start,
@@ -14,8 +15,8 @@ class OverflowEventsRow<T> {
 
   OverflowEventsRow<T> copyWith({
     List<DayEvent<T>>? events,
-    DateTime? start,
-    DateTime? end,
+    TZDateTime? start,
+    TZDateTime? end,
   }) {
     return OverflowEventsRow<T>(
       events: events ?? this.events,

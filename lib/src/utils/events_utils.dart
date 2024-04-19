@@ -1,3 +1,5 @@
+import 'package:timezone/timezone.dart';
+
 import '../../calendar_day_view.dart';
 import '../extensions/time_of_day_extension.dart';
 import '../models/overflow_event.dart';
@@ -9,8 +11,8 @@ import '../models/overflow_event.dart';
 
 List<OverflowEventsRow<T>> processOverflowEvents<T>(
   List<DayEvent<T>> sortedEvents, {
-  required DateTime startOfDay,
-  required DateTime endOfDay,
+  required TZDateTime startOfDay,
+  required TZDateTime endOfDay,
   bool cropBottomEvents = false,
 }) {
   if (sortedEvents.isEmpty) return [];
