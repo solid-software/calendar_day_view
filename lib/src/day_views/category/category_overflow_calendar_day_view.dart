@@ -187,11 +187,6 @@ class _CategoryOverflowCalendarDayViewState<T, U>
       timeEnd,
       widget.timeGap,
     );
-    print('timeStart: $timeStart');
-    print('timeEnd: $timeEnd');
-    print('timeList $timeList');
-    print('widget.clock()" ${widget.clock()}');
-
 
     final rowHeight = widget.heightPerMin * widget.timeGap;
 

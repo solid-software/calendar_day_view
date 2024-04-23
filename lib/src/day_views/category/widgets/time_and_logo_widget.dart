@@ -32,6 +32,9 @@ class TimeColumn extends StatelessWidget {
   final ValueGetter<DateTime> clock;
   @override
   Widget build(BuildContext context) {
+    final textStyle = timeTextStyle ?? Theme.of(context).textTheme.bodySmall;
+    final timeStagger = textStyle!.fontSize! ~/ 2;
+
     return Stack(
       children: [
         ListView.builder(
@@ -41,28 +44,36 @@ class TimeColumn extends StatelessWidget {
           itemBuilder: (context, index) {
             final time = timeList.elementAt(index);
 
+            BoxConstraints constraints =
+                BoxConstraints.tightFor(height: rowHeight);
+            if (index == 0) {
+              constraints =
+                  BoxConstraints.tightFor(height: rowHeight - timeStagger);
+            }
+            if (index == timeList.length - 1) {
+              constraints =
+                  BoxConstraints.tightFor(height: rowHeight + timeStagger);
+            }
+
             return ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: rowHeight),
+              constraints: constraints,
               key: ValueKey(time),
               child: Row(
                 children: [
                   Container(
-                      decoration: BoxDecoration(
-                        color: index % 2 == 0 ? evenRowColor : oddRowColor,
+                    decoration: BoxDecoration(
+                      color: index % 2 == 0 ? evenRowColor : oddRowColor,
+                    ),
+                    constraints: constraints,
+                    child: SizedBox(
+                      width: timeColumnWidth,
+                      child: Text(
+                        "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, "0")}",
+                        style: textStyle,
+                        textAlign: TextAlign.center,
                       ),
-                      constraints: BoxConstraints(
-                        maxHeight: rowHeight,
-                        minHeight: rowHeight,
-                      ),
-                      child: SizedBox(
-                        width: timeColumnWidth - 1,
-                        child: Center(
-                          child: Text(
-                            "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, "0")}",
-                            style: timeTextStyle,
-                          ),
-                        ),
-                      )),
+                    ),
+                  ),
                 ],
               ),
             );
