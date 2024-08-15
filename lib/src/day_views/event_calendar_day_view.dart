@@ -56,8 +56,7 @@ class EventCalendarDayView<T> extends StatefulWidget
   State<EventCalendarDayView> createState() => _EventCalendarDayViewState<T>();
 }
 
-class _EventCalendarDayViewState<T>
-    extends State<EventCalendarDayView<T>> {
+class _EventCalendarDayViewState<T> extends State<EventCalendarDayView<T>> {
   List<DateTime> _timesInDay = [];
 
   @override

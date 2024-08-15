@@ -1,6 +1,8 @@
 import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
 
+typedef TimeFormatter = String Function(DateTime);
+
 class TimeColumn extends StatelessWidget {
   const TimeColumn({
     super.key,
@@ -16,6 +18,8 @@ class TimeColumn extends StatelessWidget {
     this.timeTextStyle,
     required this.heightPerMin,
     required this.clock,
+    required this.timeFormatter,
+    required this.currentTimeFormatter,
   });
 
   final double rowHeight;
@@ -30,6 +34,9 @@ class TimeColumn extends StatelessWidget {
   final TextStyle? timeTextStyle;
   final double heightPerMin;
   final ValueGetter<DateTime> clock;
+  final TimeFormatter timeFormatter;
+  final TimeFormatter currentTimeFormatter;
+
   @override
   Widget build(BuildContext context) {
     final textStyle = timeTextStyle ?? Theme.of(context).textTheme.bodySmall;
@@ -68,7 +75,7 @@ class TimeColumn extends StatelessWidget {
                     child: SizedBox(
                       width: timeColumnWidth,
                       child: Text(
-                        "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, "0")}",
+                        timeFormatter(time),
                         style: textStyle,
                         textAlign: TextAlign.center,
                       ),
@@ -94,7 +101,7 @@ class TimeColumn extends StatelessWidget {
                 constraints: BoxConstraints(minWidth: timeColumnWidth),
                 child: Center(
                   child: Text(
-                    '${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+                    currentTimeFormatter(now),
                     style: const TextStyle(
                       color: Colors.black,
                       fontSize: 12,

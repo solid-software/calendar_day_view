@@ -36,8 +36,7 @@ class OverflowListViewRow<T> extends StatefulWidget {
   State<OverflowListViewRow<T>> createState() => _OverflowListViewRowState<T>();
 }
 
-class _OverflowListViewRowState<T>
-    extends State<OverflowListViewRow<T>> {
+class _OverflowListViewRowState<T> extends State<OverflowListViewRow<T>> {
   late ScrollController _scrollCtrl;
   bool _atEndOfList = true;
 

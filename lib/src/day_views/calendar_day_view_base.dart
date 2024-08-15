@@ -55,7 +55,6 @@ abstract class CalendarDayView<T> extends Widget {
         cropBottomEvents: cropBottomEvents ?? false,
       );
 
-
   /// Create [InRowCalendarDayView]
   ///
   /// Show all events that are happened in the same time gap window in a single row

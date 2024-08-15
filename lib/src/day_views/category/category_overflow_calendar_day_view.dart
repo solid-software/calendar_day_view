@@ -91,6 +91,8 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
     this.groupingStrategy,
     this.groupLayoutStrategy,
     required this.minColumnWidth,
+    required this.timeLabelsFormatter,
+    required this.currentTimeFormatter,
     ValueGetter<DateTime>? clock,
   })  : clock = clock ?? DateTime.now,
         super(key: key);
@@ -103,6 +105,10 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
   final GroupLayoutStrategy<T, U>? groupLayoutStrategy;
 
   final TitleRowBuilder? titleRowBuilder;
+
+  final TimeFormatter timeLabelsFormatter;
+
+  final TimeFormatter currentTimeFormatter;
 
   /// List of category
   final List<EventCategory<U>> categories;
@@ -246,6 +252,8 @@ class _CategoryOverflowCalendarDayViewState<T, U>
                               timeTextStyle: widget.timeTextStyle,
                               heightPerMin: widget.heightPerMin,
                               clock: widget.clock,
+                              timeFormatter: widget.timeLabelsFormatter,
+                              currentTimeFormatter: widget.currentTimeFormatter,
                             ),
                           ),
                         ),

@@ -90,8 +90,7 @@ class InRowCalendarDayView<T> extends StatefulWidget
   State<InRowCalendarDayView> createState() => _InRowCalendarDayViewState<T>();
 }
 
-class _InRowCalendarDayViewState<T>
-    extends State<InRowCalendarDayView<T>> {
+class _InRowCalendarDayViewState<T> extends State<InRowCalendarDayView<T>> {
   List<DateTime> _timesInDay = [];
   double _heightPerMin = 1;
   TZDateTime _currentTime = TZDateTime.now(local);
