@@ -31,12 +31,25 @@ class CategoryDayViewLayoutMetrics {
   final double contentWidth;
   final double contentHeight;
 
+  /// The scrollable body's viewport, relative to the day view's top-left.
+  ///
+  /// [Rect.left] is where the body starts horizontally (after the time
+  /// column), [Rect.top] is where it starts vertically (below the header), and
+  /// the size is the visible viewport — as opposed to the full scrollable
+  /// content size, which is [contentWidth] x [contentHeight].
+  ///
+  /// Useful for overlaying content (indicators, minimaps, custom gesture
+  /// layers) that must align with the table body. Defaults to [Rect.zero]
+  /// until the first frame has been laid out and measured.
+  final Rect bodyViewport;
+
   @override
   int get hashCode => Object.hash(
         isHorizontallyOverflowing,
         isVerticallyOverflowing,
         contentWidth,
         contentHeight,
+        bodyViewport,
       );
 
   const CategoryDayViewLayoutMetrics({
@@ -44,6 +57,7 @@ class CategoryDayViewLayoutMetrics {
     required this.isVerticallyOverflowing,
     required this.contentWidth,
     required this.contentHeight,
+    this.bodyViewport = Rect.zero,
   });
 
   @override
@@ -53,13 +67,15 @@ class CategoryDayViewLayoutMetrics {
           other.isHorizontallyOverflowing == isHorizontallyOverflowing &&
           other.isVerticallyOverflowing == isVerticallyOverflowing &&
           other.contentWidth == contentWidth &&
-          other.contentHeight == contentHeight;
+          other.contentHeight == contentHeight &&
+          other.bodyViewport == bodyViewport;
 
   @override
   String toString() => 'CategoryDayViewLayoutMetrics('
       'isHorizontallyOverflowing: $isHorizontallyOverflowing, '
       'isVerticallyOverflowing: $isVerticallyOverflowing, '
-      'contentWidth: $contentWidth, contentHeight: $contentHeight)';
+      'contentWidth: $contentWidth, contentHeight: $contentHeight, '
+      'bodyViewport: $bodyViewport)';
 }
 
 abstract class GroupingStrategy<T> {
@@ -234,6 +250,24 @@ class _CategoryOverflowCalendarDayViewState<T, U>
   late final _timeScrollController = _verticalScrollLink.addAndGet();
   late final _vertScrollController = _verticalScrollLink.addAndGet();
 
+  /// Identifies the scrollable body so its viewport rect can be measured.
+  final _bodyKey = GlobalKey();
+
+  /// Measures the scrollable body's viewport relative to the day view's
+  /// top-left, so the result accounts for the header and any safe-area inset.
+  Rect _measureBodyViewport() {
+    final root = context.findRenderObject();
+    final body = _bodyKey.currentContext?.findRenderObject();
+    if (root is! RenderBox ||
+        body is! RenderBox ||
+        !root.hasSize ||
+        !body.hasSize) {
+      return Rect.zero;
+    }
+
+    return root.globalToLocal(body.localToGlobal(Offset.zero)) & body.size;
+  }
+
   @override
   Widget build(BuildContext context) {
     final timeStart = widget.currentDate.copyTimeAndMinClean(widget.startOfDay);
@@ -265,6 +299,7 @@ class _CategoryOverflowCalendarDayViewState<T, U>
             final contentHeight = rowHeight * timeList.length;
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
               final hPosition = _horizScrollController.hasClients
                   ? _horizScrollController.position
                   : null;
@@ -278,6 +313,7 @@ class _CategoryOverflowCalendarDayViewState<T, U>
                     vPosition != null && vPosition.maxScrollExtent > 0,
                 contentWidth: contentWidth,
                 contentHeight: contentHeight,
+                bodyViewport: _measureBodyViewport(),
               ));
             });
           }
@@ -336,6 +372,7 @@ class _CategoryOverflowCalendarDayViewState<T, U>
                     ),
                     Expanded(
                       child: ClipPath(
+                        key: _bodyKey,
                         clipper: VerticalClipper(),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
