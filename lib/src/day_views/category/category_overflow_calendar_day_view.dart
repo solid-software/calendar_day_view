@@ -4,7 +4,6 @@ import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
 import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
-import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:timezone/timezone.dart';
 
 import '../../../calendar_day_view.dart';
@@ -21,6 +20,48 @@ typedef TitleRowBuilder = Widget Function({
   Widget? logo,
 });
 
+typedef CategoryDayViewLayoutMetricsCallback = void Function(
+  CategoryDayViewLayoutMetrics metrics,
+);
+
+@immutable
+class CategoryDayViewLayoutMetrics {
+  final bool isHorizontallyOverflowing;
+  final bool isVerticallyOverflowing;
+  final double contentWidth;
+  final double contentHeight;
+
+  @override
+  int get hashCode => Object.hash(
+        isHorizontallyOverflowing,
+        isVerticallyOverflowing,
+        contentWidth,
+        contentHeight,
+      );
+
+  const CategoryDayViewLayoutMetrics({
+    required this.isHorizontallyOverflowing,
+    required this.isVerticallyOverflowing,
+    required this.contentWidth,
+    required this.contentHeight,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CategoryDayViewLayoutMetrics &&
+          other.isHorizontallyOverflowing == isHorizontallyOverflowing &&
+          other.isVerticallyOverflowing == isVerticallyOverflowing &&
+          other.contentWidth == contentWidth &&
+          other.contentHeight == contentHeight;
+
+  @override
+  String toString() => 'CategoryDayViewLayoutMetrics('
+      'isHorizontallyOverflowing: $isHorizontallyOverflowing, '
+      'isVerticallyOverflowing: $isVerticallyOverflowing, '
+      'contentWidth: $contentWidth, contentHeight: $contentHeight)';
+}
+
 abstract class GroupingStrategy<T> {
   ({List<EventGroup<T>> grouped, List<CategorizedDayEvent<T>> nonGrouped})
       groupEvents(List<CategorizedDayEvent<T>> events);
@@ -28,6 +69,7 @@ abstract class GroupingStrategy<T> {
 
 class NoGroupingStrategy<T> implements GroupingStrategy<T> {
   const NoGroupingStrategy();
+
   @override
   ({List<EventGroup<T>> grouped, List<CategorizedDayEvent<T>> nonGrouped})
       groupEvents(List<CategorizedDayEvent<T>> events) {
@@ -49,6 +91,7 @@ class EventGroup<T> extends CategorizedDayEvent<T> {
 
 abstract class GroupLayoutStrategy<T, U> {
   const GroupLayoutStrategy();
+
   bool canLayout(EventGroup<T> group) => true;
 
   Widget layout(
@@ -93,6 +136,9 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
     required this.minColumnWidth,
     required this.timeLabelsFormatter,
     required this.currentTimeFormatter,
+    this.horizontalScrollControllerGroup,
+    this.verticalScrollControllerGroup,
+    this.onLayoutMetrics,
     ValueGetter<DateTime>? clock,
   })  : clock = clock ?? DateTime.now,
         super(key: key);
@@ -100,6 +146,9 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
   final Border? tableBodyBorder;
   final Border? timeColumnBorder;
   final double minColumnWidth;
+  final LinkedScrollControllerGroup? horizontalScrollControllerGroup;
+  final LinkedScrollControllerGroup? verticalScrollControllerGroup;
+  final CategoryDayViewLayoutMetricsCallback? onLayoutMetrics;
   final ValueGetter<DateTime> clock;
   final GroupingStrategy<T>? groupingStrategy;
   final GroupLayoutStrategy<T, U>? groupLayoutStrategy;
@@ -176,10 +225,12 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
 
 class _CategoryOverflowCalendarDayViewState<T, U>
     extends State<CategoryOverflowCalendarDayView<T, U>> {
-  final _horizontalScrollLink = LinkedScrollControllerGroup();
+  late final _horizontalScrollLink =
+      widget.horizontalScrollControllerGroup ?? LinkedScrollControllerGroup();
   late final _headerScrollController = _horizontalScrollLink.addAndGet();
   late final _horizScrollController = _horizontalScrollLink.addAndGet();
-  final _verticalScrollLink = LinkedScrollControllerGroup();
+  late final _verticalScrollLink =
+      widget.verticalScrollControllerGroup ?? LinkedScrollControllerGroup();
   late final _timeScrollController = _verticalScrollLink.addAndGet();
   late final _vertScrollController = _verticalScrollLink.addAndGet();
 
@@ -206,6 +257,30 @@ class _CategoryOverflowCalendarDayViewState<T, U>
           final totalWidth = max(minTotalWidth, constraints.maxWidth);
           final rowLength = totalWidth - widget.timeColumnWidth;
           final tileWidth = rowLength / categoriesCount;
+
+          final onLayoutMetrics = widget.onLayoutMetrics;
+
+          if (onLayoutMetrics != null) {
+            final contentWidth = rowLength;
+            final contentHeight = rowHeight * timeList.length;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final hPosition = _horizScrollController.hasClients
+                  ? _horizScrollController.position
+                  : null;
+              final vPosition = _vertScrollController.hasClients
+                  ? _vertScrollController.position
+                  : null;
+              onLayoutMetrics(CategoryDayViewLayoutMetrics(
+                isHorizontallyOverflowing:
+                    hPosition != null && hPosition.maxScrollExtent > 0,
+                isVerticallyOverflowing:
+                    vPosition != null && vPosition.maxScrollExtent > 0,
+                contentWidth: contentWidth,
+                contentHeight: contentHeight,
+              ));
+            });
+          }
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -313,6 +388,15 @@ class _CategoryOverflowCalendarDayViewState<T, U>
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _headerScrollController.dispose();
+    _horizScrollController.dispose();
+    _timeScrollController.dispose();
+    _vertScrollController.dispose();
+    super.dispose();
   }
 }
 
