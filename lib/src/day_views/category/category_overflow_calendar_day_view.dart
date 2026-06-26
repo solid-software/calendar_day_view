@@ -26,56 +26,33 @@ typedef CategoryDayViewLayoutMetricsCallback = void Function(
 
 @immutable
 class CategoryDayViewLayoutMetrics {
-  final bool isHorizontallyOverflowing;
-  final bool isVerticallyOverflowing;
-  final double contentWidth;
-  final double contentHeight;
-
-  /// The scrollable body's viewport, relative to the day view's top-left.
-  ///
-  /// [Rect.left] is where the body starts horizontally (after the time
-  /// column), [Rect.top] is where it starts vertically (below the header), and
-  /// the size is the visible viewport — as opposed to the full scrollable
-  /// content size, which is [contentWidth] x [contentHeight].
-  ///
-  /// Useful for overlaying content (indicators, minimaps, custom gesture
-  /// layers) that must align with the table body. Defaults to [Rect.zero]
-  /// until the first frame has been laid out and measured.
+  final Size bodyContentSize;
   final Rect bodyViewport;
 
+  bool get isHorizontallyOverflowing =>
+      bodyContentSize.width > bodyViewport.width;
+
+  bool get isVerticallyOverflowing =>
+      bodyContentSize.height > bodyViewport.height;
+
   @override
-  int get hashCode => Object.hash(
-        isHorizontallyOverflowing,
-        isVerticallyOverflowing,
-        contentWidth,
-        contentHeight,
-        bodyViewport,
-      );
+  int get hashCode => Object.hash(bodyContentSize, bodyViewport);
 
   const CategoryDayViewLayoutMetrics({
-    required this.isHorizontallyOverflowing,
-    required this.isVerticallyOverflowing,
-    required this.contentWidth,
-    required this.contentHeight,
-    this.bodyViewport = Rect.zero,
+    required this.bodyContentSize,
+    required this.bodyViewport,
   });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CategoryDayViewLayoutMetrics &&
-          other.isHorizontallyOverflowing == isHorizontallyOverflowing &&
-          other.isVerticallyOverflowing == isVerticallyOverflowing &&
-          other.contentWidth == contentWidth &&
-          other.contentHeight == contentHeight &&
+          other.bodyContentSize == bodyContentSize &&
           other.bodyViewport == bodyViewport;
 
   @override
   String toString() => 'CategoryDayViewLayoutMetrics('
-      'isHorizontallyOverflowing: $isHorizontallyOverflowing, '
-      'isVerticallyOverflowing: $isVerticallyOverflowing, '
-      'contentWidth: $contentWidth, contentHeight: $contentHeight, '
-      'bodyViewport: $bodyViewport)';
+      'bodyContentSize: $bodyContentSize, bodyViewport: $bodyViewport)';
 }
 
 abstract class GroupingStrategy<T> {
@@ -255,14 +232,15 @@ class _CategoryOverflowCalendarDayViewState<T, U>
 
   /// Measures the scrollable body's viewport relative to the day view's
   /// top-left, so the result accounts for the header and any safe-area inset.
-  Rect _measureBodyViewport() {
+  /// Returns null while the render tree is not ready to be measured.
+  Rect? _measureBodyViewport() {
     final root = context.findRenderObject();
     final body = _bodyKey.currentContext?.findRenderObject();
     if (root is! RenderBox ||
         body is! RenderBox ||
         !root.hasSize ||
         !body.hasSize) {
-      return Rect.zero;
+      return null;
     }
 
     return root.globalToLocal(body.localToGlobal(Offset.zero)) & body.size;
@@ -295,25 +273,21 @@ class _CategoryOverflowCalendarDayViewState<T, U>
           final onLayoutMetrics = widget.onLayoutMetrics;
 
           if (onLayoutMetrics != null) {
-            final contentWidth = rowLength;
-            final contentHeight = rowHeight * timeList.length;
+            final bodyContentSize = Size(
+              rowLength,
+              rowHeight * timeList.length,
+            );
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
-              final hPosition = _horizScrollController.hasClients
-                  ? _horizScrollController.position
-                  : null;
-              final vPosition = _vertScrollController.hasClients
-                  ? _vertScrollController.position
-                  : null;
+
+              final bodyViewport = _measureBodyViewport();
+
+              if (bodyViewport == null) return;
+
               onLayoutMetrics(CategoryDayViewLayoutMetrics(
-                isHorizontallyOverflowing:
-                    hPosition != null && hPosition.maxScrollExtent > 0,
-                isVerticallyOverflowing:
-                    vPosition != null && vPosition.maxScrollExtent > 0,
-                contentWidth: contentWidth,
-                contentHeight: contentHeight,
-                bodyViewport: _measureBodyViewport(),
+                bodyContentSize: bodyContentSize,
+                bodyViewport: bodyViewport,
               ));
             });
           }
