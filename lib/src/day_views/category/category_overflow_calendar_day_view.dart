@@ -243,7 +243,7 @@ class _CategoryOverflowCalendarDayViewState<T, U>
       return null;
     }
 
-    return root.globalToLocal(body.localToGlobal(Offset.zero)) & body.size;
+    return body.localToGlobal(Offset.zero, ancestor: root) & body.size;
   }
 
   @override
