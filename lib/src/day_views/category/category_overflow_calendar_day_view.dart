@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:calendar_day_view/src/extensions/list_extensions.dart';
 import 'package:calendar_day_view/src/extensions/time_of_day_extension.dart';
+import 'package:calendar_day_view/src/models/scrollbar_visibility.dart';
 import 'package:calendar_day_view/src/widgets/timed_rebuilder.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart';
@@ -132,6 +133,7 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
     this.horizontalScrollControllerGroup,
     this.verticalScrollControllerGroup,
     this.onLayoutMetrics,
+    this.horizontalScrollbarVisibility = ScrollbarVisibility.never,
     ValueGetter<DateTime>? clock,
   })  : clock = clock ?? DateTime.now,
         super(key: key);
@@ -142,6 +144,7 @@ class CategoryOverflowCalendarDayView<T, U> extends StatefulWidget
   final LinkedScrollControllerGroup? horizontalScrollControllerGroup;
   final LinkedScrollControllerGroup? verticalScrollControllerGroup;
   final CategoryDayViewLayoutMetricsCallback? onLayoutMetrics;
+  final ScrollbarVisibility horizontalScrollbarVisibility;
   final ValueGetter<DateTime> clock;
   final GroupingStrategy<T>? groupingStrategy;
   final GroupLayoutStrategy<T, U>? groupLayoutStrategy;
@@ -269,6 +272,8 @@ class _CategoryOverflowCalendarDayViewState<T, U>
           final totalWidth = max(minTotalWidth, constraints.maxWidth);
           final rowLength = totalWidth - widget.timeColumnWidth;
           final tileWidth = rowLength / categoriesCount;
+          final isHorizontallyOverflowing =
+              minTotalWidth > constraints.maxWidth;
 
           final onLayoutMetrics = widget.onLayoutMetrics;
 
@@ -352,38 +357,42 @@ class _CategoryOverflowCalendarDayViewState<T, U>
                           decoration: BoxDecoration(
                               border: widget.tableBodyBorder,
                               color: Colors.black),
-                          child: SingleChildScrollView(
-                            controller: _vertScrollController,
-                            clipBehavior: Clip.none,
-                            physics: const ClampingScrollPhysics(),
+                          child: _wrapWithHorizontalScrollbar(
+                            isOverflowing: isHorizontallyOverflowing,
                             child: SingleChildScrollView(
-                              controller: _horizScrollController,
+                              controller: _vertScrollController,
                               clipBehavior: Clip.none,
                               physics: const ClampingScrollPhysics(),
-                              scrollDirection: Axis.horizontal,
-                              child: SizedBox(
-                                width: rowLength,
-                                child: _DayViewBody<T, U>(
-                                  timeList: timeList,
-                                  rowHeight: rowHeight,
-                                  tileWidth: tileWidth,
-                                  evenRowColor: widget.evenRowColor,
-                                  oddRowColor: widget.oddRowColor,
-                                  rowBuilder: widget.backgroundTimeTileBuilder,
-                                  events: widget.events,
-                                  categories: widget.categories,
-                                  verticalDivider: widget.verticalDivider,
-                                  timeGap: widget.timeGap,
-                                  heightPerMin: widget.heightPerMin,
-                                  timeTextStyle: widget.timeTextStyle,
-                                  eventBuilder: widget.eventBuilder,
-                                  horizontalDivider: widget.horizontalDivider,
-                                  onTileTap: widget.onTileTap,
-                                  groupingStrategy: widget.groupingStrategy ??
-                                      NoGroupingStrategy<T>(),
-                                  groupLayoutStrategy:
-                                      widget.groupLayoutStrategy,
-                                  clock: widget.clock,
+                              child: SingleChildScrollView(
+                                controller: _horizScrollController,
+                                clipBehavior: Clip.none,
+                                physics: const ClampingScrollPhysics(),
+                                scrollDirection: Axis.horizontal,
+                                child: SizedBox(
+                                  width: rowLength,
+                                  child: _DayViewBody<T, U>(
+                                    timeList: timeList,
+                                    rowHeight: rowHeight,
+                                    tileWidth: tileWidth,
+                                    evenRowColor: widget.evenRowColor,
+                                    oddRowColor: widget.oddRowColor,
+                                    rowBuilder:
+                                        widget.backgroundTimeTileBuilder,
+                                    events: widget.events,
+                                    categories: widget.categories,
+                                    verticalDivider: widget.verticalDivider,
+                                    timeGap: widget.timeGap,
+                                    heightPerMin: widget.heightPerMin,
+                                    timeTextStyle: widget.timeTextStyle,
+                                    eventBuilder: widget.eventBuilder,
+                                    horizontalDivider: widget.horizontalDivider,
+                                    onTileTap: widget.onTileTap,
+                                    groupingStrategy: widget.groupingStrategy ??
+                                        NoGroupingStrategy<T>(),
+                                    groupLayoutStrategy:
+                                        widget.groupLayoutStrategy,
+                                    clock: widget.clock,
+                                  ),
                                 ),
                               ),
                             ),
@@ -398,6 +407,26 @@ class _CategoryOverflowCalendarDayViewState<T, U>
           );
         },
       ),
+    );
+  }
+
+  Widget _wrapWithHorizontalScrollbar({
+    required bool isOverflowing,
+    required Widget child,
+  }) {
+    final visibility = widget.horizontalScrollbarVisibility;
+
+    if (visibility == ScrollbarVisibility.never || !isOverflowing) {
+      return child;
+    }
+
+    return Scrollbar(
+      controller: _horizScrollController,
+      thumbVisibility: visibility == ScrollbarVisibility.always,
+      scrollbarOrientation: ScrollbarOrientation.bottom,
+      notificationPredicate: (notification) =>
+          notification.metrics.axis == Axis.horizontal,
+      child: child,
     );
   }
 
