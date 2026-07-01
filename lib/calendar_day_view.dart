@@ -17,4 +17,5 @@ export 'src/day_views/overflow/overflow_calendar_day_view.dart';
 export 'src/models/categorized_day_event.dart';
 export 'src/models/day_event.dart';
 export 'src/models/event_category.dart';
+export 'src/models/scrollbar_visibility.dart';
 export 'src/models/typedef.dart';
